@@ -13,7 +13,7 @@ enum ROOMCOL      {COLR1 = 5,COLR2 = 8,COLR3 = 5,COLR4 = 4};            //number
 enum ROOMROW      {ROWR1 = 7,ROWR2 = 5,ROWR3 = 12,ROWR4 = 15};	        //number of rows each room has
 enum NUMROOMS     {R1,R2,R3,R4,R5,R6,R7,NUM_ROOMS};	       
 enum ROOMREVEALED {NO,YES};    
-enum TILEREVEALED {NOT_REVELEAD,REVEALED};
+enum TILEREVEALED {NOT_REVEALED,REVEALED};
 enum MOVEPATH     {MOVELEFT,MOVERIGHT,MOVEUP,MOVEDOWN};
 enum WHAT_COLOR   {BLUE = 1,RED,MAGENTA,YELLOW,GREEN,CYAN,WHITE,BLACK,NUM_COLORS};
 //---------------------------------------------- typedefs -------------------------------------------------

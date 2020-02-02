@@ -17,7 +17,8 @@
 
 
 //---------------------------------------------- global vars ---------------------------------------------
-extern CHARACTER *PLAYER;
+extern CHARACTER  *PLAYER;
+extern CHARACTER  *COMPANION;
 //---------------------------------------------- prototypes ----------------------------------------------
 int  playerAttack              (CHARACTER *const attacker,CHARACTER *const defender);
 int  swordsmanAttack           (CHARACTER *const attacker,CHARACTER *const defender);
@@ -33,13 +34,15 @@ void resetAttributes           (CHARACTER *const character);
 attack_fpointer   makeCharAtack(CHARTYPE type);
 
 //---------------------------------------------- prototypes in other files -------------------------------
-void  printToPrompt       (const int x, const int y, const char *const str);
-void  restoreMainWin      (void); 
-void  clearMainWin        (void);
-void  copyMainWin         (void);
-void  clearPromptWin      (void);
-int   checkIfHealthPotion (CHARACTER *const attacker);
-int   playerUseItem       (void);
-int   checkIfValidItem    (const unsigned int item);
-int   useItem             (CHARACTER *const attacker,CHARACTER *const defender);
-int   playerDisplayInventory (void);
+extern void  printToPrompt          (const int x, const int y, const char *const str);
+extern void  restoreMainWin         (void); 
+extern void  clearMainWin           (void);
+extern void  copyMainWin            (void);
+extern void  clearPromptWin         (void);
+extern int   checkIfHealthPotion    (CHARACTER *const attacker);
+extern int   playerUseItem          (void);
+extern int   checkIfValidItem       (const unsigned int item);
+extern int   charUseItem            (CHARACTER *const attacker,CHARACTER *const defender,ITEMTYPE item);
+extern int   computerCheckItem      (CHARACTER *const attacker,CHARACTER *const defender);
+extern int   playerDisplayInventory (void);
+extern int   accessPlayerInventory  (void);

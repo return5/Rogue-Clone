@@ -4,25 +4,26 @@
 
 //----------------------------------------------- variables ---------------------------------------
 extern int START_OVER;
-
 //---------------------------------------- prototypes ---------------------------------------------
 
 void  initalizeWorld  (void);
-void  gameLoop       (void);
+void  gameLoop        (void);
 //---------------------------------------- prototypes in other files ------------------------------
 
-void  makeRooms         (void);
-void  initWindow        (void);
-void  initScreen        (void);
-void  printSpecificRoom (const ROOMINFO *const room);
-void  makeItemValues    (void);
-void  makeEnemies       (void);
-void  printAllEnemies   (void);
-void  initWorldMap      (void);
-void  printWorldMap     (void);
-int   makePassages      (void);
-void  initColors        (void);
-void  makePlayer        (void);
-void  selectClass       (void);
-void  printClassSelect  (void);
-void  playerTurn        (void);
+extern void  makeRooms         (void);
+extern void  initWindow        (void);
+extern void  initScreen        (void);
+extern void  printSpecificRoom (const ROOMINFO *const room);
+extern void  makeItemValues    (void);
+extern void  makeEnemies       (void);
+extern void  printAllEnemies   (void);
+extern void  initWorldMap      (void);
+extern void  printWorldMap     (void);
+extern int   makePassages      (void);
+extern void  initColors        (void);
+extern void  makePlayer        (void);
+extern void  selectClass       (void);
+extern void  printClassSelect  (void);
+extern void  playerTurn        (void);
+extern void  computerTurn      (void);
+extern void  initPlayerOnMap   (void);

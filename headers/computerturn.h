@@ -5,6 +5,8 @@
 //---------------------------------------------- headers -------------------------------------------------
 #include "characters.h"
 #include "rooms.h"
+#include <stdlib.h>
+#include <ncurses.h>
 //---------------------------------------------- define --------------------------------------------------
 
 //---------------------------------------------- enums ---------------------------------------------------
@@ -17,10 +19,14 @@
 
 
 //---------------------------------------------- global vars ---------------------------------------------
-extern CHARACTER *PLAYER;
+extern ENEMY *ENEMIES;
 
 //---------------------------------------------- prototypes ----------------------------------------------
-int          moveCharacter       (const MOVEMENT next_move,CHARACTER *const character);
-void         updateMap           (const CHARACTER *const character);
-MOVEMENT     getNextMovement     (const CHARACTER *const character);
+void      computerTurn        (void);
+
 //---------------------------------------------- prototypes in other files -------------------------------
+
+extern int       moveCharacter       (const MOVEMENT next_move,CHARACTER *const character);
+extern MOVEMENT  getNextMovement     (const CHARACTER *const character);
+extern void  printToPrompt     (const int x, const int y, const char *const str);
+//---------------------------------------------- code ----------------------------------------------------

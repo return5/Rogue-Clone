@@ -21,20 +21,24 @@
 extern int         PLAY;
 extern CHARACTER  *PLAYER;
 extern CHARACTER  *COMPANION;
-extern PLAYERCLASS PLAYER_CLASS;
+//extern WINDOW      *MAIN_WIN;
 
 //---------------------------------------------- prototypes ----------------------------------------------
-void  selectClass   (void);
-int   playerTurn    (void);
+void  selectClass           (void);
+int   playerTurn            (void);
+int   accessPlayerInventory (void);
 //---------------------------------------------- prototypes in other files -------------------------------
-void      printToPrompt          (const int x, const int y, const char *const str);
-void      clearPromptWin         (void);
-int       moveCharacter          (const MOVEMENT next_move,CHARACTER *const character);
-int       playerDisplayInventory (void);
-void      initalizeWorld		 (void);
-void      printAllEnemies        (void);
-void      printWorldMap          (void);
-void      restoreMainWin	     (void);
-int        playerUseItem         (CHARACTER *const character);
-CHARACTER *itemUseOn             (void);
-void       printAreYouSure       (void);
+extern void         printToPrompt          (const int x, const int y, const char *const str);
+extern void         clearPromptWin         (void);
+extern int          moveCharacter          (const MOVEMENT next_move,CHARACTER *const character);
+extern int          playerDisplayInventory (void);
+extern void         initalizeWorld		 (void);
+extern void         printAllEnemies        (void);
+extern void         printWorldMap          (void);
+extern void         restoreMainWin	     (void);
+extern int          charUseItem            (CHARACTER *const attacker,CHARACTER *const defender,ITEMTYPE item);
+extern CHARACTER    *itemUseOn             (void);
+extern void          printAreYouSure       (void);
+extern void          printCharacter        (const CHARACTER *const character);
+extern void          printWorldMap         (void);
+extern void          printTilePiece        (const int x, const int y);

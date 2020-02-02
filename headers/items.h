@@ -22,20 +22,23 @@
 extern CHARACTER *PLAYER;
 
 //---------------------------------------------- prototypes ----------------------------------------------
-ITEM   **makeCharInventory    (CHARTYPE type);
-int    useHealthPotion        (const ITEM  *const item, CHARACTER *const character);
-int    usePoisonPotion        (const ITEM  *const item, CHARACTER *const character);
-int    useSlowHealthPotion    (const ITEM  *const item, CHARACTER *const character);
-int    useFood                (const ITEM  *const item, CHARACTER *const character);
-int    useArrow               (const ITEM  *const item, CHARACTER *const character);
-int    useFireCharge          (const ITEM  *const item, CHARACTER *const character);
-void   makeItemValues         (void);
-void   printInventory         (ITEM **inventory);
-int    checkIfHealthPotion    (CHARACTER *const attacker);
-int    playerUseItem          (CHARACTER *const character);
-int    checkIfValidItem       (const unsigned int item);
-int    useItem                (CHARACTER *const attacker,CHARACTER *const defender);
-int    playerDisplayInventory (void);
+ITEM     **makeCharInventory    (CHARTYPE type);
+int      useHEALTHPIPE          (const ITEM  *const item, CHARACTER *const character);
+int      usePoisonPotion        (const ITEM  *const item, CHARACTER *const character);
+int      useSlowHEALTHPIPE      (const ITEM  *const item, CHARACTER *const character);
+int      useFood                (const ITEM  *const item, CHARACTER *const character);
+int      useArrow               (const ITEM  *const item, CHARACTER *const character);
+int      useFireCharge          (const ITEM  *const item, CHARACTER *const character);
+void     makeItemValues         (void);
+void     printInventory         (ITEM **inventory);
+int      checkIfHEALTHPIPE      (CHARACTER *const attacker);
+int      playerUseItem          (CHARACTER *const character);
+int      checkIfValidItem       (const unsigned int item);
+int      useItem                (CHARACTER *const attacker,CHARACTER *const defender);
+int      playerDisplayInventory (void);
+int      computerCheckItem      (CHARACTER *const attacker,CHARACTER *const defender);
+int      charUseItem            (CHARACTER *const attacker,CHARACTER *const defender,ITEMTYPE item);  
+ITEMTYPE chooseHealthItem       (const CHARACTER *const attacker);
 //---------------------------------------------- prototypes in other files -------------------------------
 void  printToPrompt      (const int x, const int y, const char *const str);
 void  restoreMainWin     (void); 
