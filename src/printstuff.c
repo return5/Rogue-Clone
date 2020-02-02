@@ -9,6 +9,9 @@
 
 //---------------------------------------- global vars ----------------------------------------------
 
+//---------------------------------------- prototypes ---------------------------------------------
+static void initPlayerRevealedLocations(void);
+
 //---------------------------------------- code -----------------------------------------------------
 
 //initializes ncurses screen functionality
@@ -103,11 +106,10 @@ void printWorldMap(void) {
 	wclear(MAIN_WIN);
 	for(int i = 0; i < HEIGHT; i++) {
 		for(int j = 0; j < WIDTH; j++) {
-			wattron(MAIN_WIN,COLOR_PAIR(WORLDMAP[i][j]->color));
-			mvwprintw(MAIN_WIN,i,j,"%c",WORLDMAP[i][j]->icon);
-			wattroff(MAIN_WIN,COLOR_PAIR(WORLDMAP[i][j]->color));
+			printTilePiece(j,i);
 		}
 	}
+	wrefresh(MAIN_WIN);
 }
 
 void printClassSelect(void) {
@@ -120,10 +122,11 @@ void printClassSelect(void) {
 
 //prints an individual tile to screen
 void printTilePiece(const int x, const int y) {
-	wattron(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
-	mvwprintw(MAIN_WIN,y,x,"%c",WORLDMAP[y][x]->icon);
-	wattroff(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
-	wrefresh(MAIN_WIN);
+	if(WORLDMAP[y][x]->isrevealed == REVEALED) {
+		wattron(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
+		mvwprintw(MAIN_WIN,y,x,"%c",WORLDMAP[y][x]->icon);
+		wattroff(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
+	}
 }
 
 //print room to main_win
@@ -143,7 +146,7 @@ void loopThroughRooms(void) {
 //print an individual CHARACTER (player or enemy) to the map.
 void printCharacter(const CHARACTER *const character) {
 	wattron(MAIN_WIN,COLOR_PAIR(character->color));
-	mvwprintw(MAIN_WIN,character->loc->y,character->loc->x,"%c",character->icon);
+	mvwprintw(MAIN_WIN,character->current_loc->y,character->current_loc->x,"%c",character->icon);
 	wattroff(MAIN_WIN,COLOR_PAIR(character->color));
 	wrefresh(MAIN_WIN);
 }
@@ -155,6 +158,45 @@ void printAllEnemies(void) {
 		printCharacter(head->character);
 		head = head->next;
 	}
+}
+
+//set the locations around the player at start to revealed.
+static void initPlayerRevealedLocations(void) {
+	int y_up    = PLAYER->current_loc->y;
+	int y_down  = PLAYER->current_loc->y;
+	int x_left  = PLAYER->current_loc->x;
+	int x_right = PLAYER->current_loc->x;
+	for(int i = 0; i < 3; i++) {
+		if((signed int)PLAYER->current_loc->y - i >= 0) {
+			y_up = PLAYER->current_loc->y - i;
+		}
+		if(PLAYER->current_loc->y + i < HEIGHT) {
+			y_down = PLAYER->current_loc->y + i;
+		}
+		for(int j = 0; j < 3; j++) {
+			if((signed int)PLAYER->current_loc->x - j >= 0) {
+				x_left = PLAYER->current_loc->x - j;
+			}
+			if(PLAYER->current_loc->x + j < WIDTH) {
+				x_right = PLAYER->current_loc->x + j;
+			}
+			WORLDMAP[y_down][x_right]->isrevealed = REVEALED;
+			WORLDMAP[y_down][x_left]->isrevealed  = REVEALED;
+			WORLDMAP[y_up][x_right]->isrevealed   = REVEALED;
+			WORLDMAP[y_up][x_left]->isrevealed    = REVEALED;			
+		}
+	}
+}
+
+//when game starts show player and reveal the tiles around them.
+void initPlayerOnMap(void) {
+	printCharacter(PLAYER);
+	initPlayerRevealedLocations();
+}
+
+void updateMap(const CHARACTER *const character) {
+	printTilePiece(character->prev_loc->x,character->prev_loc->y);
+	printCharacter(character);
 }
 
 //initialize the color feature. allows colors to be displayed and used.

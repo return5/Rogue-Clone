@@ -23,7 +23,7 @@ static void makeRoomOnMap(const ROOMINFO *const room) {
 	for(unsigned int i = 0; i < room->col_len; i++) {
 		for(unsigned int j = 0; j < room->row_len; j++) {
 			WORLDMAP[room->loc->y + i][room->loc->x + j]->icon    =  room->room[i][j];
-			WORLDMAP[room->loc->y + i][room->loc->x + j]->room =  malloc(SIZE_ROOM);
+			WORLDMAP[room->loc->y + i][room->loc->x + j]->room    =  malloc(SIZE_ROOM);
 			*(WORLDMAP[room->loc->y + i][room->loc->x + j]->room) =  *room;
 			WORLDMAP[room->loc->y + i][room->loc->x + j]->color   =  room->color;
 		}
@@ -43,7 +43,7 @@ static void fillInWorldMap(void) {
 		for(int j = 0; j < WIDTH; j++) {
 			WORLDMAP[i][j]             =  malloc(SIZE_TILE);
 			WORLDMAP[i][j]->icon       =  ' ';
-			WORLDMAP[i][j]->isrevealed =  NOT_REVELEAD;
+			WORLDMAP[i][j]->isrevealed =  NOT_REVEALED;
 			WORLDMAP[i][j]->room       =  NULL;
 			WORLDMAP[i][j]->color      =  BLACK;
 		}
