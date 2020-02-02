@@ -5,12 +5,12 @@
 
 //---------------------------------------- enums -------------------------------------------------
 
-enum ITEMTYPE    {HEALTHPOTION,POISONPOTION,SLOWHEALTH,FOOD,ARROW,FIRECHARGE,NUM_TYPE};     //type of items. used to sort them
+enum ITEMTYPE    {HEALTHPIPE,POISONPOTION,SLOWHEALTH,FOOD,ARROW,FIRECHARGE,NUM_TYPE};     //type of items. used to sort them
 enum CHARTYPE    {SWORDSMAN,MAGE,SPEARMAN,WOLF,ARCHER,BEAR,MONSTER,SKELETON,NUM_CHARTYPE,PLAYERTYPE};   //type of character
 enum CHARCOLOR   {BLUECHAR = 1,REDCHAR,MAGENTACHAR,YELLOWCHAR,GREENCHAR,CYANCHAR,WHITECHAR,BLACKCHAR};
 enum PLAYERCLASS {WARRIOR,PLAYER_ARCHER,ANIMAL_WHISPER};
 enum ATTACKTYPE  {REGULAR,BLEEDING,ELECTRIC,FRIGHTEND};
-enum MOVEMENT    {UP,DOWN,LEFT,RIGHT};
+enum MOVEMENT    {UP,DOWN,LEFT,RIGHT,NO_MOVE};
 //---------------------------------------- typedefs  -----------------------------------------------
 typedef  struct  LOCATION    LOCATION;
 typedef  struct  ITEM        ITEM;
@@ -35,7 +35,7 @@ struct LOCATION {
 struct ITEM {
 	char                *name, *description;  //name of item, description of item
 	ITEMTYPE            type;                //value for type of item. used for sorting items
-	unsigned int        value;              //generic value for what it does, like how much health to damage/heal.
+	int                 value;              //generic value for what it does, like how much health to damage/heal.
 	unsigned int        number_items;      //number of items
 	item_fpointer       useItem;          //function pointer to function which allows the use of the item
 };
@@ -50,6 +50,7 @@ struct FLAGS {
 	unsigned  short  electrocuted; 
 	unsigned  short  frightend;
 	unsigned  short  missedturns;
+	unsigned  short  damageperturn;
 };
 struct CHARACTER {
 	char              *name;		              //name of character
@@ -64,7 +65,8 @@ struct CHARACTER {
 	int               has_comp;			 //flag for if character has a companion
 	ATTACKTYPE        attacktype;	    //type fo damage done
 	MOVEMENT          prev_move;       //previous direction character moved
-	LOCATION          *loc;           //current location for character
+	LOCATION          *current_loc;   //current location for character
+	LOCATION          *prev_loc;      //character's location on the previous turn
 	FLAGS             *flags;         //struct holding status flags
 	CHARCOLOR         color;         //color of the icon to display
 	ITEM              **inventory;   //inventory of items being held

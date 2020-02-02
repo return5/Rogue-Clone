@@ -5,7 +5,7 @@
 	license:       GPL 2.0
 	dependencies:  ncurses.
 				   C compiler with GNU C11 support.
-	version:       0.5
+	version:       0.7
 */
 
 //---------------------------------------- headers----------------------------------------------------
@@ -26,6 +26,7 @@ void initalizeWorld(void) {
 void gameLoop(void) {
 	while(PLAY) {
 		playerTurn();
+		computerTurn();
 	}
 	endwin();
 }
@@ -40,7 +41,7 @@ int main(void) {
 	initalizeWorld();	
 	makePlayer();
 	printWorldMap();
-	printAllEnemies();
+	initPlayerOnMap();
 	gameLoop();
 	return 0;
 }

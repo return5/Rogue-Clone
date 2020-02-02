@@ -97,7 +97,7 @@ static unsigned int checkIfOverlap(const unsigned int x, const unsigned int y, c
 //get random color for that room.
 static WHAT_COLOR getColor(void) {
 	switch((rand() % 7) +1) {  
-		case BLUE   : return BLUE;
+		case BLUE   : return CYAN;   //i reserve blue specifically for player icon.
 		case RED    : return RED;
 		case MAGENTA: return MAGENTA;
 		case YELLOW : return YELLOW;

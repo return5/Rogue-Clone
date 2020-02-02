@@ -3,8 +3,7 @@
 */
 
 //---------------------------------------------- headers -------------------------------------------------
-#include "characters.h"
-#include "rooms.h"
+#include "computerturn.h"
 //---------------------------------------------- define --------------------------------------------------
 
 //---------------------------------------------- enums ---------------------------------------------------
@@ -17,10 +16,27 @@
 
 
 //---------------------------------------------- global vars ---------------------------------------------
-extern CHARACTER *PLAYER;
+static const size_t SIZE_ENEMY = sizeof(ENEMY);
 
 //---------------------------------------------- prototypes ----------------------------------------------
-int          moveCharacter       (const MOVEMENT next_move,CHARACTER *const character);
-void         updateMap           (const CHARACTER *const character);
-MOVEMENT     getNextMovement     (const CHARACTER *const character);
-//---------------------------------------------- prototypes in other files -------------------------------
+static void characterTurn(CHARACTER *const character);
+
+//---------------------------------------------- code ----------------------------------------------------
+
+static void characterTurn(CHARACTER *const character) {
+	if(moveCharacter(getNextMovement(character),character) == 0) {
+		while(moveCharacter(rand() % 4,character) == 0);
+	}
+}
+
+void computerTurn(void) {
+	ENEMY *temp = malloc(SIZE_ENEMY);
+	temp        = ENEMIES;
+	while(temp != NULL) {
+		if(WORLDMAP[temp->character->current_loc->y][temp->character->current_loc->x]->isrevealed == REVEALED) {
+			characterTurn(temp->character);
+		}
+		temp = temp->next;
+	}
+	free(temp);
+}

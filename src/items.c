@@ -32,83 +32,91 @@ static  const  size_t  SIZE_ITEMDESCRIPTION  =  sizeof(char) * 47;
 
 
 //global vars to set value for the respective item
-static  int  VALUE_HEALTH;
-static  int  VALUE_POISON;
-static  int  VALUE_SLOWHEALTH;
-static  int  VALUE_FIRECHARGE;
-static  int  VALUE_FOOD;
+static  int  TURNS_POISON;
+static  int  TURNS_SLOWHEALTH;
+static  int  TURNS_FIRECHARGE;
+static  int  TURNS_FOOD;
+static	int  FIRE_DAMAGE;
+static	int  POISON_DAMAGE;
+static	int  SLOW_RESTORE;
+static	int  FOOD_RESTORE;
+static  int  HEALTH_RESTORE;
 
 //---------------------------------------------- code ----------------------------------------------------
 
-//check if attacker has health items, and if so, use them
-int checkIfHealthPotion(CHARACTER *const attacker) {
-	if(attacker->inventory[HEALTHPOTION]->number_items > 0) {
-		attacker->inventory[HEALTHPOTION]->useItem(attacker->inventory[HEALTHPOTION],attacker);
-		attacker->inventory[HEALTHPOTION]->number_items--;
-		return 1;
+//randomly select a helath item to use. if character has one in inventory, return it to be used. if not, randomly choose another
+ITEMTYPE chooseHealthItem(const CHARACTER *const attacker) {
+	switch(rand() % 3) {
+		case 0:
+			if(attacker->inventory[HEALTHPIPE]->number_items > 0) {
+				return HEALTHPIPE;
+			}
+			break;
+		case 1:
+			if(attacker->inventory[SLOWHEALTH]->number_items > 0) {
+				return SLOWHEALTH;
+			}
+			break;
+		case 2:
+			if(attacker->inventory[FOOD]->number_items > 0) {
+				return FOOD;
+			}
+			break;
+		default: // do nothing
+			break;
 	}
-	else if(attacker->inventory[SLOWHEALTH]->number_items > 0) {
-		attacker->inventory[SLOWHEALTH]->useItem(attacker->inventory[SLOWHEALTH],attacker);
-		attacker->inventory[SLOWHEALTH]->number_items--;
-		return 1;
-	}
-	else if(attacker->inventory[FOOD]->number_items > 0) {
-		attacker->inventory[FOOD]->useItem(attacker->inventory[FOOD],attacker);
-		attacker->inventory[FOOD]->number_items--;
-		return 1;
-	}
-	return 0;
+	return chooseHealthItem(attacker);
 }
 
 int checkIfValidItem(const unsigned int item) {
 	return(PLAYER->inventory[item] != NULL && PLAYER->inventory[item]->number_items > 0)? 1 : 0;
 }
 
-int playerUseItem(CHARACTER *const character) {
-	if(character!= NULL) {
-		unsigned int item = (unsigned int) (getch() - '0');
-		if (checkIfValidItem(item))  {
-			switch(PLAYER->inventory[item]->type) {
-				case HEALTHPOTION://FALLTHROUGH
-				case SLOWHEALTH  ://FALLTHROUGH
-				case FOOD        ://FALLTHROUGH
-				case POISONPOTION://FALLTHROUGH
-				case FIRECHARGE  ://FALLTHROUGH
-					PLAYER->inventory[item]->useItem(PLAYER->inventory[item],character);
-					PLAYER->inventory[item]->number_items--;
-					getch();
-					return 1;
-				case ARROW:
-					PLAYER->inventory[item]->useItem(PLAYER->inventory[item],character);
-					//FALLTHROUGH
-				case NUM_TYPE://FALLTHROUGH
-				default: return 0;
-			}
-		}
+int charUseItem(CHARACTER *const character, CHARACTER *const defender,ITEMTYPE item) {
+	char c[50];
+	switch(item) {
+		case HEALTHPIPE  ://FALLTHROUGH
+		case SLOWHEALTH  ://FALLTHROUGH
+		case FOOD        :
+			snprintf(c,50,"%s uses %s",character->name,character->inventory[item]->name);
+			printToPrompt(0,0,c);
+			character->inventory[item]->useItem(character->inventory[item],character);
+			character->inventory[item]->number_items--;
+			return 1;
+		case POISONPOTION://FALLTHROUGH
+		case FIRECHARGE  :
+			snprintf(c,50,"%s uses %s",character->name,character->inventory[item]->name);
+			printToPrompt(0,0,c);
+			character->inventory[item]->useItem(character->inventory[item],defender);
+			character->inventory[item]->number_items--;
+			return 1;
+		case ARROW   : //FALLTHROUGH
+		case NUM_TYPE://FALLTHROUGH
+		default: return 0;
 	}
-	return 0;
 }
 
 //check if character has an item, and if so, use it.
-int useItem(CHARACTER *const attacker,CHARACTER *const defender) {
-	if(attacker->health <= attacker->max_health / 2 && checkIfHealthPotion(attacker)) {
-		return 1;
+int computerCheckItem(CHARACTER *const attacker,CHARACTER *const defender) {
+	//if attacker helath is less than half and attacker has an health item, select one to use
+	if(attacker->health <= attacker->max_health / 2 && (attacker->inventory[HEALTHPIPE]->number_items > 0 || attacker->inventory[SLOWHEALTH]->number_items > 0 ||attacker->inventory[FOOD]->number_items > 0)) {
+		return charUseItem(attacker,defender,chooseHealthItem(attacker));
 	}
 	if(attacker->inventory[FIRECHARGE]->number_items > 0 && attacker->type != SKELETON) {
-		attacker->inventory[FIRECHARGE]->useItem(attacker->inventory[FIRECHARGE],defender);
-		return 1;
+		attacker->inventory[FIRECHARGE]->number_items--;
+		return charUseItem(defender,defender,FIRECHARGE);
 	}
 	if(attacker->inventory[POISONPOTION]->number_items > 0) {
-		attacker->inventory[POISONPOTION]->useItem(attacker->inventory[POISONPOTION],defender);
-		return 1;
+		attacker->inventory[POISONPOTION]->number_items--;
+		return charUseItem(defender,defender,POISONPOTION);
 	}
 	return 0;
 }
 
-int useHealthPotion(const ITEM *const item,CHARACTER *const character) {
-	char c[40];
-	snprintf(c,50,"%s used a %s",character->name,item->name);
-	printToPrompt(0,0,c);
+int useHEALTHPIPE(const ITEM *const item,CHARACTER *const character) {
+	char c[22];
+	snprintf(c,22,"restored %d health",item->value);
+	printToPrompt(0,1,c);
 	character->health += item->value;
 	character->health = (character->health > character->max_health)? character->max_health : character->health;
 	return 1;
@@ -118,26 +126,30 @@ int usePoisonPotion(const ITEM *const item,CHARACTER *const character) {
 	if(rand() % 10 > character->dodge) {
 		char c[40];
 		snprintf(c,40,"%s has been poisoned",character->name);
-		printToPrompt(0,0,c);
-		character->flags->poisoned = item->value;
+		printToPrompt(0,1,c);
+		character->flags->poisoned = TURNS_POISON;
+		character->health += item->value;
+		character->flags->damageperturn = item->value;
 		return 1;
 	}
+	printToPrompt(0,1,"missed");
 	return 0;
 }
 
-int useSlowHealthPotion(const ITEM *const item,CHARACTER *const character) {
-	char c[40];
-	snprintf(c,40,"%s used a %s",character->name,item->name);
-	printToPrompt(0,0,c);
-	character->flags->slowhealth = item->value;
+int useSlowHEALTHPIPE(const ITEM *const item,CHARACTER *const character) {
+	character->flags->slowhealth = TURNS_SLOWHEALTH;
+	character->flags->damageperturn = item->value;
 	return 1;
 }
 
 int useFood(const ITEM *const item,CHARACTER *const character) {
-	char c[40];
-	snprintf(c,40,"%s used a %s",character->name,item->name);
-	printToPrompt(0,0,c);
-	character->flags->ate = item->value;
+	char c[22];
+	snprintf(c,22,"restored %d health",item->value);
+	printToPrompt(0,1,c);
+	character->flags->ate = TURNS_FOOD;
+	character->health += FOOD_RESTORE;
+	character->flags->damageperturn = item->value;
+	character->health = (character->health > character->max_health)? character->max_health : character->health;
 	return 1;
 }
 
@@ -149,26 +161,28 @@ int useFireCharge(const ITEM *const item,CHARACTER *const character) {
 	if(rand() % 10 > character->dodge) {
 		char c[40];
 		snprintf(c,40,"%s was hit with a firecharge",character->name);
-		printToPrompt(0,0,c);
-		character->health -= 5;
+		printToPrompt(0,1,c);
+		character->health += item->value;
 		if(rand() % 10 > character->dodge) {
 			char d[40];
 			snprintf(d,40,"%s is on fire",character->name);
-			printToPrompt(0,1,d);
-			character->flags->onfire = item->value;
+			printToPrompt(0,2,d);
+			character->flags->onfire = TURNS_FIRECHARGE;
+			character->flags->damageperturn = item->value;
 			return 1;
 		}
 		return 0;
 	}
+	printToPrompt(0,1,"missed.");
 	return -1;
 }
 
 //sets the function pointer to the function which governs that item's use. 
 static item_fpointer getItemFPointer(ITEMTYPE type) {
 	switch(type) {
-		case HEALTHPOTION: return  useHealthPotion;
+		case HEALTHPIPE:   return  useHEALTHPIPE;
 		case POISONPOTION: return  usePoisonPotion;
-		case SLOWHEALTH:   return  useSlowHealthPotion;
+		case SLOWHEALTH:   return  useSlowHEALTHPIPE;
 		case FOOD:         return  useFood;
 		case ARROW:        return  useArrow;
 		case FIRECHARGE:   return  useFireCharge;
@@ -180,12 +194,12 @@ static item_fpointer getItemFPointer(ITEMTYPE type) {
 //sets the 'value' variable for each item. this is used when the item is used by a character
 static int getItemValue(ITEMTYPE type) {
 	switch(type) {
-		case HEALTHPOTION: return  VALUE_HEALTH;
-		case POISONPOTION: return  VALUE_POISON;
-		case SLOWHEALTH:   return  VALUE_SLOWHEALTH;
-		case FOOD:         return  VALUE_FOOD;
+		case HEALTHPIPE:   return  HEALTH_RESTORE;
+		case POISONPOTION: return  POISON_DAMAGE;
+		case SLOWHEALTH:   return  SLOW_RESTORE;
+		case FOOD:         return  FOOD_RESTORE;
 		case ARROW:        return  5;
-		case FIRECHARGE:   return  VALUE_FIRECHARGE;
+		case FIRECHARGE:   return  FIRE_DAMAGE;
 		case NUM_TYPE:     return  -1;         //should not be used. just here to make a case for each enum member
 		default :          return  -1; 
 	}
@@ -195,7 +209,7 @@ static int getItemValue(ITEMTYPE type) {
 static char *makeItemDescription(ITEMTYPE type) {
 	char *description = malloc(SIZE_ITEMDESCRIPTION);
 	switch(type) {
-		case HEALTHPOTION: snprintf(description,SIZE_ITEMDESCRIPTION,"Instantly resotres health points.");               break;          
+		case HEALTHPIPE:   snprintf(description,SIZE_ITEMDESCRIPTION,"Instantly resotres health points.");               break;          
 		case POISONPOTION: snprintf(description,SIZE_ITEMDESCRIPTION,"Can be thrown at an enemy to poison them.");       break;  
 		case SLOWHEALTH:   snprintf(description,SIZE_ITEMDESCRIPTION,"Regenerate health points over time.");             break;
 		case FOOD:         snprintf(description,SIZE_ITEMDESCRIPTION,"Food. you can eat it.");                           break;
@@ -212,7 +226,7 @@ static char *makeItemDescription(ITEMTYPE type) {
 static char *makeItemName(ITEMTYPE type) {
 	char *name = malloc(SIZE_ITEMNAME);
 	switch(type) {
-		case HEALTHPOTION: snprintf(name,SIZE_ITEMNAME,"Instant Health Potion");     break;
+		case HEALTHPIPE:   snprintf(name,SIZE_ITEMNAME,"Health PIPE");               break;
 		case POISONPOTION: snprintf(name,SIZE_ITEMNAME,"Poison Potion");             break;
 		case SLOWHEALTH:   snprintf(name,SIZE_ITEMNAME,"Slow Health Potion");        break;
 		case FOOD:         snprintf(name,SIZE_ITEMNAME,"Food");                      break;
@@ -241,7 +255,7 @@ static ITEM *makeItem(ITEMTYPE type, const int has_item,const int max_num_item) 
 static ITEM **makeItemLoop(const int item_chance[NUM_TYPE]) {
 	ITEM **inventory = malloc(SIZE_INVENTORY);
 	const int max_number_items[] = { 4,3,4,6,10,3 };
-	for(int i = HEALTHPOTION; i < NUM_TYPE; i++) {
+	for(int i = HEALTHPIPE; i < NUM_TYPE; i++) {
 		//make each individual item with a random chance to even be in that character's inventory.
 		inventory[i] = makeItem(i,(((rand() % 11 )< item_chance[i]) ? 1 : 0), max_number_items[i]);
 	}
@@ -250,11 +264,15 @@ static ITEM **makeItemLoop(const int item_chance[NUM_TYPE]) {
 
 //set values of the items to random values
 void makeItemValues(void) {
-	VALUE_HEALTH      =  (rand() % 6) + 5;
-	VALUE_POISON      =  (rand() % 4) + 2;
-	VALUE_SLOWHEALTH  =  (rand() % 7) + 4;
-	VALUE_FOOD        =  (rand() % 2) + 2;
-	VALUE_FIRECHARGE  =  (rand() % 5) + 4;
+	TURNS_POISON      =  (rand() % 3) + 3;
+	TURNS_SLOWHEALTH  =  (rand() % 3) + 3;
+	TURNS_FOOD        =  (rand() % 6) + 5;
+	TURNS_FIRECHARGE  =  (rand() % 3) + 1;
+	FIRE_DAMAGE		  =  -1 * (rand() % 3) + 3;
+	POISON_DAMAGE     =  -1 * (rand() % 4) + 1;
+	SLOW_RESTORE	  =  (rand() % 3) + 4;
+	FOOD_RESTORE      =  (rand() % 3) + 2;
+	HEALTH_RESTORE    =  (rand() % 6) + 5;
 }
 //make the inventory for a character based on teh type of character. array is the chance out of 10 for each item being created.
 ITEM **makeCharInventory(CHARTYPE type) {

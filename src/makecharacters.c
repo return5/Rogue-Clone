@@ -90,7 +90,7 @@ static int getPlayerMaxHealth(void) {
 //get color for that character.
 static CHARCOLOR getCharColor(CHARTYPE type) {
 	switch(type) {  
-		case SWORDSMAN:    return  BLUECHAR;
+		case SWORDSMAN:    return  CYANCHAR;
 		case SPEARMAN:     return  REDCHAR;
 		case MAGE:         return  MAGENTACHAR;
 		case WOLF:         return  YELLOWCHAR;
@@ -202,6 +202,7 @@ static FLAGS *makeCharFlags(void) {
 	flags->missedturns   =  0;
 	flags->electrocuted  =  0;
 	flags->frightend     =  0;
+	flags->damageperturn =  0;
 	return flags;
 }
 
@@ -275,7 +276,9 @@ static CHARACTER *makeCharacter(CHARTYPE type) {
 	character->type	          =  type;
 	character->name           =  makeCharName(type);
 	character->icon           =  makeCharIcon(type);
-	character->loc            =  makeCharLocation();
+	character->current_loc    =  makeCharLocation();
+	character->prev_loc       =  malloc(SIZE_LOCATION);
+	*(character->prev_loc)    =  *(character->current_loc);
 	character->flags          =  makeCharFlags();
 	character->inventory      =  makeCharInventory(type);
 	character->charAttack     =  makeCharAtack(type);
@@ -308,8 +311,8 @@ void makeEnemies(void) {
 void makePlayer(void) {
 	PLAYER = makeCharacter(PLAYERTYPE);
 	if(PLAYER_CLASS == ANIMAL_WHISPER) {
-		COMPANION        = makeCharacter(WOLF);
-		COMPANION->loc   = PLAYER->loc;
-		PLAYER->has_comp = 1;
+		COMPANION                =  makeCharacter(WOLF);
+		COMPANION->current_loc   =  PLAYER->current_loc;
+		PLAYER->has_comp         =  1;
 	}
 }

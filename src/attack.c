@@ -224,20 +224,21 @@ static int switchToDefenseStance(CHARACTER *const attacker) {
 	return 0;
 }
 
-//the player's turn while negaged in combat. 
+//the player's turn while engaged in combat. 
 int playerAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 	switch(getch()) {
 		case 1: regularDamage(attacker,defender,0,attacker->attacktype);
 			break;
 		case 2: 
-			if(switchToDefenseStance(attacker) == 1) {
+			if(switchToDefenseStance(attacker)) {
 				return 1;
 			}
 			else {
 				printToPrompt(0,0,"sorry, already in defensive stance");
+				getch();
 				return 0;
 			}
-		case 3:  return playerDisplayInventory();
+		case 3: return accessPlayerInventory();
 		default: return 0; 
 	}
 	return 1;
@@ -261,7 +262,7 @@ int swordsmanAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 			return (switchToDefenseStance(attacker) == 1)? 1 : swordsmanAttack(attacker,defender);
 		case 8:
 		case 9://FALLTHROUGH
-			return (useItem(attacker,defender) == 1)? 1 : swordsmanAttack(attacker,defender);
+			return (computerCheckItem(attacker,defender) == 1)? 1 : swordsmanAttack(attacker,defender);
 		default:
 			return 1;		
 	}
@@ -285,7 +286,7 @@ int mageAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 		case 7:
 		case 8:
 		case 9://FALLTHROUGH
-			return (useItem(attacker,defender) == 1)? 1 : mageAttack(attacker,defender);
+			return (computerCheckItem(attacker,defender) == 1)? 1 : mageAttack(attacker,defender);
 		default: 
 			return 0;		
 	}
@@ -307,7 +308,7 @@ int spearmanAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 			return (switchToDefenseStance(attacker) == 1)? 1 : spearmanAttack(attacker,defender);
 		case 6:
 		case 7://FALLTHRUGH
-			return (useItem(attacker,defender) == 1)? 1 : spearmanAttack(attacker,defender);
+			return (computerCheckItem(attacker,defender) == 1)? 1 : spearmanAttack(attacker,defender);
 		default: 
 			return 0;
 	}
@@ -352,7 +353,7 @@ int archerAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 		case 6:
 		case 7:
 		case 8://FALLTHRUGH
-			return (useItem(attacker,defender) == 1)? 1 : archerAttack(attacker,defender);
+			return (computerCheckItem(attacker,defender) == 1)? 1 : archerAttack(attacker,defender);
 		default: 
 			return 0;
 		}
@@ -392,7 +393,7 @@ int skeletonAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 			break;
 		case 6:
 		case 7://FALLTHROUGH
-			return (useItem(attacker,defender) == 1)? 1 : skeletonAttack(attacker,defender);
+			return (computerCheckItem(attacker,defender) == 1)? 1 : skeletonAttack(attacker,defender);
 		default:
 			return 0;
 	}
@@ -424,7 +425,7 @@ void resetAttributes(CHARACTER *const character) {
 	character->defense            =  character->max_defense;
 	character->attack             =  character->max_attack;
 	character->flags->missedturns =  0;
-	character->flags->frightened  =  0;
+	character->flags->frightend   =  0;
 	character->flags->defending   =  0;
 }
 
