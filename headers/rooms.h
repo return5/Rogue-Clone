@@ -2,6 +2,7 @@
 
 
 //---------------------------------------------- define -------------------------------------------------
+#pragma once
 #define  HEIGHT 30     //height of main_win   make sure to match these values with the ones in charmodels.h
 #define  WIDTH  70	  //width of game_win   make sure to match these values with the ones in charmodels.h
 
