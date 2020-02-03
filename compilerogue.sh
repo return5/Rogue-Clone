@@ -22,7 +22,8 @@ find  "${PWD}/src" -type f > "${PWD}/src_files"
 if  ! (gcc -v >/dev/null 2>&1) || [ "$1" == "-c" ]; then
 	echo "using clang instead of gcc"
 	if (clang -v >/dev/null 2>&1); then
-		clang @src_files @flags -Iheaders  -lncurses -Wswitch-enum -std=gnu11 -orogue_clone   #'src_files' is list of all .c files to include. 'flags' is a file which list all compiler flags to use
+		clang @src_files -Iheaders  -O2 -lncurses -Wswitch-enum -finline-functions
+ -std=gnu11 -orogue_clone   #'src_files' is list of all .c files to include. 'flags' is a file which list all compiler flags to use
 	else
 		echo "sorry, clang doesnt seem to be installed"
 		exit
@@ -30,7 +31,7 @@ if  ! (gcc -v >/dev/null 2>&1) || [ "$1" == "-c" ]; then
 else 	
 	if (gcc -v >/dev/null 2>&1); then
 		echo "using gcc"
-		gcc @src_files @flags -orogueclone -Iheaders -Wswitch-enum -lncurses -std=gnu11 -orogue_clone 
+		gcc @src_files -O2 -orogueclone -Iheaders -Wswitch-enum -lncurses -finline-functions -std=gnu11 -orogue_clone 
 	else
 		echo "sorry, gcc doesnt seem to be installed"
 		exit
