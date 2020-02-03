@@ -3,6 +3,7 @@
 */
 
 //---------------------------------------------- headers -------------------------------------------------
+#pragma once
 #include "rooms.h"
 #include "characters.h"
 #include <ncurses.h>
@@ -27,18 +28,21 @@ extern CHARACTER  *COMPANION;
 void  selectClass           (void);
 int   playerTurn            (void);
 int   accessPlayerInventory (void);
+
 //---------------------------------------------- prototypes in other files -------------------------------
 extern void         printToPrompt          (const int x, const int y, const char *const str);
 extern void         clearPromptWin         (void);
 extern int          moveCharacter          (const MOVEMENT next_move,CHARACTER *const character);
 extern int          playerDisplayInventory (void);
-extern void         initalizeWorld		 (void);
+extern void         initalizeWorld		   (void);
 extern void         printAllEnemies        (void);
 extern void         printWorldMap          (void);
-extern void         restoreMainWin	     (void);
+extern void         restoreMainWin	       (void);
 extern int          charUseItem            (CHARACTER *const attacker,CHARACTER *const defender,ITEMTYPE item);
 extern CHARACTER    *itemUseOn             (void);
-extern void          printAreYouSure       (void);
-extern void          printCharacter        (const CHARACTER *const character);
-extern void          printWorldMap         (void);
-extern void          printTilePiece        (const int x, const int y);
+extern void         printAreYouSure        (void);
+extern void         printCharacter         (const CHARACTER *const character);
+extern void         printWorldMap          (void);
+extern void         printTilePiece         (const int x, const int y);
+extern int          checkIfEnemy           (void); 
+extern void         engageCombat           (CHARACTER *const character);

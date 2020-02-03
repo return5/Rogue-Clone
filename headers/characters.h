@@ -2,11 +2,11 @@
 
 
 //---------------------------------------- define -------------------------------------------------
-
+#pragma once
 //---------------------------------------- enums -------------------------------------------------
 
 enum ITEMTYPE    {HEALTHPIPE,POISONPOTION,SLOWHEALTH,FOOD,ARROW,FIRECHARGE,NUM_TYPE};     //type of items. used to sort them
-enum CHARTYPE    {SWORDSMAN,MAGE,SPEARMAN,WOLF,ARCHER,BEAR,MONSTER,SKELETON,NUM_CHARTYPE,PLAYERTYPE};   //type of character
+enum CHARTYPE    {SWORDSMAN,MAGE,SPEARMAN,WOLF,ARCHER,BEAR,MONSTER,SKELETON,NUM_CHARTYPE,COMPWOLF,PLAYERTYPE};   //type of character
 enum CHARCOLOR   {BLUECHAR = 1,REDCHAR,MAGENTACHAR,YELLOWCHAR,GREENCHAR,CYANCHAR,WHITECHAR,BLACKCHAR};
 enum PLAYERCLASS {WARRIOR,PLAYER_ARCHER,ANIMAL_WHISPER};
 enum ATTACKTYPE  {REGULAR,BLEEDING,ELECTRIC,FRIGHTEND};
@@ -63,7 +63,6 @@ struct CHARACTER {
 	int               dodge;               //chance to dodge an attack
 	int 			  attack_chance;      //chance to success when attack
 	int               has_comp;			 //flag for if character has a companion
-	ATTACKTYPE        attacktype;	    //type fo damage done
 	MOVEMENT          prev_move;       //previous direction character moved
 	LOCATION          *current_loc;   //current location for character
 	LOCATION          *prev_loc;      //character's location on the previous turn

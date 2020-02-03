@@ -5,15 +5,17 @@
 #include "playerturn.h"
 
 //---------------------------------------------- prototypes ----------------------------------------------
-static inline int   getPlayerInputWolrMap (void);
-static inline void  quitGame              (void);
-static inline void  resetMap              (void);
-static inline void  updateTilesRevealed   (void);
-static inline void  checkIfCombat         (void);
+static inline int   getPlayerInputWolrdMap (void);
+static inline void  quitGame               (void);
+static inline void  resetMap               (void);
+static inline void  updateTilesRevealed    (void);
+static inline void  checkIfCombat          (void);
 //---------------------------------------------- code ----------------------------------------------------
 
 static inline void checkIfCombat(void) {
-
+	if(checkIfEnemy()) {
+		engageCombat(PLAYER);
+	}
 }
 
 //when player moves to new tile, reveal the tiles in the local area. 
@@ -64,10 +66,18 @@ static inline void quitGame(void) {
 	}
 }
 
-static inline void resetMap(void) {
-	initalizeWorld();
-	printWorldMap();
-	printAllEnemies();
+static inline void resetMap(void) {	
+	printAreYouSure();
+	switch(getch()) {
+		case 'y'://FALLTHROUGH
+		case 'Y':
+			initalizeWorld();
+			printWorldMap();
+			printAllEnemies();
+			break;
+		default:// do nothing
+			break;
+	}
 }
 
 int accessPlayerInventory(void) {
@@ -107,7 +117,7 @@ void selectClass(void) {
 	}
 }
 //when player is on world map, get the input
-static inline int getPlayerInputWolrMap(void) {
+static inline int getPlayerInputWolrdMap(void) {
 	switch(getch()) {
 		case 'w':
 			return moveCharacter(UP,PLAYER);
@@ -119,10 +129,10 @@ static inline int getPlayerInputWolrMap(void) {
 			return moveCharacter(RIGHT,PLAYER);	
 		case 'q':
 			quitGame();
-			return 0;
+			return 1;
 		case 't':
 			resetMap();
-			return 0;
+			return 1;
 		case 'i':
 			accessPlayerInventory();
 			return 0;
@@ -133,15 +143,19 @@ static inline int getPlayerInputWolrMap(void) {
 }
 
 int playerTurn(void) {
+	checkIfCombat();
 	clearPromptWin();
 	printToPrompt(0,0,"'w','a','s','d' to move around.");
 	printToPrompt(0,1,"'i' to open inventory");
 	printToPrompt(0,2,"'q' to quit game");
-	if (getPlayerInputWolrMap()) {
+	if (getPlayerInputWolrdMap()) {
 		updateTilesRevealed();
 		checkIfCombat();
 		printCharacter(PLAYER);
 		return 1;
+	}
+	else {
+		return playerTurn();
 	}
 	return 0;
 }

@@ -6,31 +6,31 @@
 	each character has a function pointer to the function which governs its attack.
 		
 */
-//---------------------------------------- headers---------------------------------------------------
+//---------------------------------------- headers----------------------------------------------------------
 #include "makecharacters.h"
 //----------------------------------------------- prototypes -----------------------------------------------
-static  char             makeCharIcon               (CHARTYPE type);
-static  char             *makeCharName              (CHARTYPE type);
-static  CHARACTER        *makeCharacter             (CHARTYPE type);
-static  int              makeCharDodge              (CHARTYPE type);
-static  int              makeCharMaxDefense         (CHARTYPE type);
-static  int              makeCharMaxAttack          (CHARTYPE type);
-static  int              makeCharMaxHealth          (CHARTYPE type);
-static  int              checkXRow                  (const int x);
-static  FLAGS            *makeCharFlags             (void);
-static  LOCATION         *makeCharLocation          (void);
-static  int              getPlayerAttackChance      (void);
-static  int              getPlayerDodge             (void);
-static  int              getPlayerMaxDefense        (void);
-static  int              getPlayerMaxAttack         (void);
-static  int              getPlayerMaxHealth         (void);
+static inline  char             makeCharIcon               (const CHARTYPE type);
+static inline  char             *makeCharName              (const CHARTYPE type);
+static inline  CHARACTER        *makeCharacter             (const CHARTYPE type);
+static inline  int              makeCharDodge              (const CHARTYPE type);
+static inline  int              makeCharMaxDefense         (const CHARTYPE type);
+static inline  int              makeCharMaxAttack          (const CHARTYPE type);
+static inline  int              makeCharMaxHealth          (const CHARTYPE type);
+static inline  int              checkXRow                  (const int x);
+static inline  FLAGS            *makeCharFlags             (void);
+static inline  LOCATION         *makeCharLocation          (void);
+static inline  int              getPlayerAttackChance      (void);
+static inline  int              getPlayerDodge             (void);
+static inline  int              getPlayerMaxDefense        (void);
+static inline  int              getPlayerMaxAttack         (void);
+static inline  int              getPlayerMaxHealth         (void);
 
 //---------------------------------------- global vars ----------------------------------------------
-static  const  size_t  SIZE_CHARACTER  =  sizeof(CHARACTER);
-static  const  size_t  SIZE_LOCATION   =  sizeof(LOCATION);
-static  const  size_t  SIZE_FLAGS      =  sizeof(FLAGS);
-static  const  size_t  SIZE_NAME	   =  sizeof(char) * 13;
-static  const  size_t  SIZE_ENEMY      =  sizeof(ENEMY);
+static const  size_t  SIZE_CHARACTER  =  sizeof(CHARACTER);
+static const  size_t  SIZE_LOCATION   =  sizeof(LOCATION);
+static const  size_t  SIZE_FLAGS      =  sizeof(FLAGS);
+static const  size_t  SIZE_NAME	   =  sizeof(char) * 13;
+static const  size_t  SIZE_ENEMY      =  sizeof(ENEMY);
 
 ENEMY     *ENEMIES;    //linked list which holds enemies
 CHARACTER *PLAYER;
@@ -38,7 +38,7 @@ CHARACTER *COMPANION;
 //---------------------------------------- code -----------------------------------------------------
 
 //get attack chance for player character based on player class
-static int getPlayerAttackChance(void) {
+static inline int getPlayerAttackChance(void) {
 	switch(PLAYER_CLASS) {
 		case WARRIOR       : return (rand() % 4) + 3;
 		case PLAYER_ARCHER : return (rand() % 4) + 2;
@@ -48,7 +48,7 @@ static int getPlayerAttackChance(void) {
 }
 
 //get dodge chance for layer based on player class
-static int getPlayerDodge(void) {
+static inline int getPlayerDodge(void) {
 	switch(PLAYER_CLASS) {
 		case WARRIOR       : return (rand() % 5) + 4;
 		case PLAYER_ARCHER : return (rand() % 4) + 6;
@@ -58,37 +58,37 @@ static int getPlayerDodge(void) {
 }
 
 //get max defense for player based upon player class
-static int getPlayerMaxDefense(void) {
+static inline int getPlayerMaxDefense(void) {
 	switch(PLAYER_CLASS) {
 		case WARRIOR       : return (rand() % 4) + 4;
-		case PLAYER_ARCHER : return (rand() % 4) + 2;
+		case PLAYER_ARCHER : return (rand() % 4) + 3;
 		case ANIMAL_WHISPER: return (rand() % 3) + 2;
 		default:             return 0;
 	}
 }
 
 //get player max attack based upon player class
-static int getPlayerMaxAttack(void) {
+static inline int getPlayerMaxAttack(void) {
 	switch(PLAYER_CLASS) {
-		case WARRIOR       : return (rand() % 4) + 6;
-		case PLAYER_ARCHER : return (rand() % 5) + 4;
-		case ANIMAL_WHISPER: return (rand() % 3) + 4;
+		case WARRIOR       : return (rand() % 5) + 8;
+		case PLAYER_ARCHER : return (rand() % 3) + 7;
+		case ANIMAL_WHISPER: return (rand() % 3) + 6;
 		default:             return 0;
 	}
 }
 
 //get max health for player backed upon player class
-static int getPlayerMaxHealth(void) {
+static inline int getPlayerMaxHealth(void) {
 	switch(PLAYER_CLASS) {
-		case WARRIOR       : return (rand() % 10) + 14;
-		case PLAYER_ARCHER : return (rand() % 9) + 12;
-		case ANIMAL_WHISPER: return (rand() % 6) + 10;
+		case WARRIOR       : return (rand() % 10) + 17;
+		case PLAYER_ARCHER : return (rand() % 9) + 14;
+		case ANIMAL_WHISPER: return (rand() % 6) + 12;
 		default:             return 0;
 	}
 }
 
 //get color for that character.
-static CHARCOLOR getCharColor(CHARTYPE type) {
+static inline CHARCOLOR getCharColor(const CHARTYPE type) {
 	switch(type) {  
 		case SWORDSMAN:    return  CYANCHAR;
 		case SPEARMAN:     return  REDCHAR;
@@ -99,13 +99,14 @@ static CHARCOLOR getCharColor(CHARTYPE type) {
 		case MONSTER:      return  GREENCHAR;
 		case SKELETON:     return  YELLOWCHAR;
 		case PLAYERTYPE:   return  BLUECHAR;
+		case COMPWOLF:     return  BLUECHAR;
 		case NUM_CHARTYPE: return  0;  //should not be used. just here to make a case for each enum member
 		default :          return  0;  //should also not be used, just to give a default case. 
 	}
 }
 
 //get the value for attack_chance for each character type
-static int makeCharAttackChance(CHARTYPE type) {
+static inline int makeCharAttackChance(const CHARTYPE type) {
 	switch(type) {
 		case PLAYERTYPE:   return  getPlayerAttackChance();
 		case SWORDSMAN:    return  2;
@@ -116,13 +117,14 @@ static int makeCharAttackChance(CHARTYPE type) {
 		case BEAR:         return  4;
 		case MONSTER:      return  2;
 		case SKELETON:     return  3;
+		case COMPWOLF:     return  4;
 		case NUM_CHARTYPE: return  0; //should not be used. just here to make a case for each enum member
 		default :          return  0; 
 	}
 }
 
 //chance to dodge an attack. each character type has its own chance with the player being random each game.
-static int makeCharDodge(CHARTYPE type) {
+static inline int makeCharDodge(const CHARTYPE type) {
 	switch(type) {
 		case PLAYERTYPE:   return  getPlayerDodge();
 		case SWORDSMAN:    return  5;
@@ -133,13 +135,14 @@ static int makeCharDodge(CHARTYPE type) {
 		case BEAR:         return  4;
 		case MONSTER:      return  4;
 		case SKELETON:     return  6;
+		case COMPWOLF:     return  7;
 		case NUM_CHARTYPE: return  0; //should not be used. just here to make a case for each enum member
 		default :          return  0; 
 	}
 }
 
 //set the defense rating for each character type.
-static int makeCharMaxDefense(CHARTYPE type) {
+static inline int makeCharMaxDefense(const CHARTYPE type) {
 	switch(type) {
 		case PLAYERTYPE:   return  getPlayerMaxDefense();
 		case SWORDSMAN:    return  3;
@@ -150,13 +153,14 @@ static int makeCharMaxDefense(CHARTYPE type) {
 		case BEAR:         return  3;
 		case MONSTER:      return  3;
 		case SKELETON:     return  2;
+		case COMPWOLF:     return  2;
 		case NUM_CHARTYPE: return  0; //should not be used. just here to make a case for each enum member
 		default :          return  0; 
 	}
 }
 
 //sets the attack value for each character type
-static int makeCharMaxAttack(CHARTYPE type) {
+static inline int makeCharMaxAttack(const CHARTYPE type) {
 	switch(type) {
 		case PLAYERTYPE:   return  getPlayerMaxAttack();
 		case SWORDSMAN:    return  6;
@@ -167,30 +171,32 @@ static int makeCharMaxAttack(CHARTYPE type) {
 		case BEAR:         return  6;
 		case MONSTER:      return  7;
 		case SKELETON:     return  8;
+		case COMPWOLF:     return  7;
 		case NUM_CHARTYPE: return  0; //should not be used. just here to make a case for each enum member
 		default :          return  0; 
 	}
 }
 
 //sets the health value for each character type
-static int makeCharMaxHealth(CHARTYPE type) {
+static inline int makeCharMaxHealth(const CHARTYPE type) {
 	switch(type) {
 		case PLAYERTYPE:   return  getPlayerMaxHealth();
-		case SWORDSMAN:    return  12;
-		case MAGE:         return  7;
-		case SPEARMAN:     return  10;
-		case WOLF:         return  8;
-		case ARCHER:       return  9;
-		case BEAR:         return  11;
-		case MONSTER:      return  12;
-		case SKELETON:     return  8;
+		case SWORDSMAN:    return  25;
+		case MAGE:         return  15;
+		case SPEARMAN:     return  20;
+		case WOLF:         return  12;
+		case COMPWOLF:	   return  15;
+		case ARCHER:       return  15;
+		case BEAR:         return  22;
+		case MONSTER:      return  30;
+		case SKELETON:     return  15;
 		case NUM_CHARTYPE: return  0; //should not be used. just here to make a case for each enum member
 		default :      	   return  0; 
 	}
 }
 
 //set default values to each of the flags in FLAGS struct
-static FLAGS *makeCharFlags(void) {
+static inline FLAGS *makeCharFlags(void) {
 	//by default all flags should be 0
 	FLAGS *flags         =  malloc(SIZE_FLAGS);
 	flags->poisoned      =  0;
@@ -207,7 +213,7 @@ static FLAGS *makeCharFlags(void) {
 }
 
 //check all icons at that x loction, if one is a '.'' or a '#' then return 1;
-static int checkXRow(const int x) {
+static inline int checkXRow(const int x) {
 	for(int i = 0; i < HEIGHT; i++) {
 		switch(WORLDMAP[i][x]->icon) {
 			case '#':
@@ -220,7 +226,7 @@ static int checkXRow(const int x) {
 }
 
 //get a random location for a character inside one of the rooms.
-static LOCATION *makeCharLocation(void) {
+static inline LOCATION *makeCharLocation(void) {
 	LOCATION *loc  =  malloc(SIZE_LOCATION);
 	do {
 		loc->x = rand() % WIDTH;
@@ -235,13 +241,14 @@ static LOCATION *makeCharLocation(void) {
 }
 
 //make the icon which will appear on screen for each characters
-static char makeCharIcon(CHARTYPE type) {
+static inline char makeCharIcon(const CHARTYPE type) {
 	switch(type) {
 		case PLAYERTYPE:   return '@';
 		case SWORDSMAN:    return 'S';
 		case MAGE:         return 'M';
 		case SPEARMAN:     return 'P';
 		case WOLF:         return 'W';
+		case COMPWOLF:     return 'W';
 		case ARCHER:       return 'A'; 
 		case BEAR:         return 'B'; 
 		case MONSTER:      return 'X';
@@ -252,7 +259,7 @@ static char makeCharIcon(CHARTYPE type) {
 }
 
 //give each character a name.
-static char *makeCharName(CHARTYPE type) {
+static inline char *makeCharName(const CHARTYPE type) {
 	char *name = malloc(SIZE_NAME);
 	switch(type) {
 		case PLAYERTYPE:   snprintf(name,SIZE_NAME,"Player");       break;
@@ -264,6 +271,7 @@ static char *makeCharName(CHARTYPE type) {
 		case BEAR:         snprintf(name,SIZE_NAME,"Bear");         break;
 		case MONSTER:      snprintf(name,SIZE_NAME,"Monster");      break;
 		case SKELETON:     snprintf(name,SIZE_NAME,"Skeleton");	    break;
+		case COMPWOLF:     snprintf(name,SIZE_NAME,"pet wolf");     break;
 		case NUM_CHARTYPE: snprintf(name,SIZE_NAME,"Num_chartype"); break;//should not be used. just here to make a case for each enum member
 		default :          /*do nothing    */                       break; 	
 	}
@@ -271,7 +279,7 @@ static char *makeCharName(CHARTYPE type) {
 }
 
 //make a character. 
-static CHARACTER *makeCharacter(CHARTYPE type) {
+static inline CHARACTER *makeCharacter(const CHARTYPE type) {
 	CHARACTER *character      =  malloc(SIZE_CHARACTER);
 	character->type	          =  type;
 	character->name           =  makeCharName(type);
@@ -311,7 +319,7 @@ void makeEnemies(void) {
 void makePlayer(void) {
 	PLAYER = makeCharacter(PLAYERTYPE);
 	if(PLAYER_CLASS == ANIMAL_WHISPER) {
-		COMPANION                =  makeCharacter(WOLF);
+		COMPANION                =  makeCharacter(COMPWOLF);
 		COMPANION->current_loc   =  PLAYER->current_loc;
 		PLAYER->has_comp         =  1;
 	}

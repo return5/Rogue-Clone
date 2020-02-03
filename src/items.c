@@ -79,14 +79,14 @@ int charUseItem(CHARACTER *const character, CHARACTER *const defender,ITEMTYPE i
 		case SLOWHEALTH  ://FALLTHROUGH
 		case FOOD        :
 			snprintf(c,50,"%s uses %s",character->name,character->inventory[item]->name);
-			printToPrompt(0,0,c);
+			printToCombatPrompt(0,0,c);
 			character->inventory[item]->useItem(character->inventory[item],character);
 			character->inventory[item]->number_items--;
 			return 1;
 		case POISONPOTION://FALLTHROUGH
 		case FIRECHARGE  :
 			snprintf(c,50,"%s uses %s",character->name,character->inventory[item]->name);
-			printToPrompt(0,0,c);
+			printToCombatPrompt(0,0,c);
 			character->inventory[item]->useItem(character->inventory[item],defender);
 			character->inventory[item]->number_items--;
 			return 1;
@@ -116,7 +116,7 @@ int computerCheckItem(CHARACTER *const attacker,CHARACTER *const defender) {
 int useHEALTHPIPE(const ITEM *const item,CHARACTER *const character) {
 	char c[22];
 	snprintf(c,22,"restored %d health",item->value);
-	printToPrompt(0,1,c);
+	printToCombatPrompt(0,1,c);
 	character->health += item->value;
 	character->health = (character->health > character->max_health)? character->max_health : character->health;
 	return 1;
@@ -126,13 +126,13 @@ int usePoisonPotion(const ITEM *const item,CHARACTER *const character) {
 	if(rand() % 10 > character->dodge) {
 		char c[40];
 		snprintf(c,40,"%s has been poisoned",character->name);
-		printToPrompt(0,1,c);
+		printToCombatPrompt(0,1,c);
 		character->flags->poisoned = TURNS_POISON;
 		character->health += item->value;
 		character->flags->damageperturn = item->value;
 		return 1;
 	}
-	printToPrompt(0,1,"missed");
+	printToCombatPrompt(0,1,"missed");
 	return 0;
 }
 
@@ -145,7 +145,7 @@ int useSlowHEALTHPIPE(const ITEM *const item,CHARACTER *const character) {
 int useFood(const ITEM *const item,CHARACTER *const character) {
 	char c[22];
 	snprintf(c,22,"restored %d health",item->value);
-	printToPrompt(0,1,c);
+	printToCombatPrompt(0,1,c);
 	character->flags->ate = TURNS_FOOD;
 	character->health += FOOD_RESTORE;
 	character->flags->damageperturn = item->value;
@@ -161,19 +161,19 @@ int useFireCharge(const ITEM *const item,CHARACTER *const character) {
 	if(rand() % 10 > character->dodge) {
 		char c[40];
 		snprintf(c,40,"%s was hit with a firecharge",character->name);
-		printToPrompt(0,1,c);
+		printToCombatPrompt(0,1,c);
 		character->health += item->value;
 		if(rand() % 10 > character->dodge) {
 			char d[40];
 			snprintf(d,40,"%s is on fire",character->name);
-			printToPrompt(0,2,d);
+			printToCombatPrompt(0,2,d);
 			character->flags->onfire = TURNS_FIRECHARGE;
 			character->flags->damageperturn = item->value;
 			return 1;
 		}
 		return 0;
 	}
-	printToPrompt(0,1,"missed.");
+	printToCombatPrompt(0,1,"missed.");
 	return -1;
 }
 
@@ -286,6 +286,7 @@ ITEM **makeCharInventory(CHARTYPE type) {
 	case MONSTER:      return  makeItemLoop( (int[]){ 6,6,6,0,0,0 } );
 	case BEAR:         return  makeItemLoop( (int[]){ 0,0,0,7,7,0 } );
 	case SKELETON:     return  makeItemLoop( (int[]){ 6,6,6,6,6,6 } );
+	case COMPWOLF:     return  makeItemLoop( (int[]){ 0,0,0,0,0,0 } );
 	case NUM_CHARTYPE: return  NULL;  //should not be used. just here to make a case for each enum member
 	default :          return  NULL; 	
 	}

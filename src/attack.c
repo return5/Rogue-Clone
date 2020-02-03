@@ -6,35 +6,83 @@
 #include "attack.h"
 
 //---------------------------------------------- prototypes ----------------------------------------------
-static void printCharRegularAttack    (CHARTYPE type, const char *const defender_name);
-static void printCharReducedAttack    (CHARTYPE type, const char *const defender_name);
-static int  dealDamage                (const CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,const int crit);
-static void makeElectrocuted          (CHARACTER *const character);
-static void makeBleeding              (CHARACTER *const defender);
-static void makeFrightened            (CHARACTER *const defender);
-static int  regularAttack             (const CHARACTER *const attacker,const CHARACTER *const defender);
-static void counterAttack             (CHARACTER *const attacker, const CHARACTER *const defender);
-static void applyEffect               (CHARACTER *const defender,ATTACKTYPE type);
-static void regularDamage             (CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,ATTACKTYPE attacktype);
-static int  switchToDefenseStance     (CHARACTER *const attacker);
-
+static inline void   printCharRegularAttack    (const CHARTYPE type, const char *const defender_name);
+static inline void   printCharReducedAttack    (const CHARTYPE type, const char *const defender_name);
+static        int    dealDamage                (const CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,const int crit);
+static        void   makeElectrocuted          (CHARACTER *const character);
+static        void   makeBleeding              (CHARACTER *const defender);
+static        void   makeFrightened            (CHARACTER *const defender);
+static        int    regularAttack             (const CHARACTER *const attacker,const CHARACTER *const defender);
+static        void   counterAttack             (CHARACTER *const attacker, const CHARACTER *const defender);
+static        void   applyEffect               (CHARACTER *const defender,ATTACKTYPE type);
+static        void   regularDamage             (CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,ATTACKTYPE attacktype);
+static        int    switchToDefenseStance     (CHARACTER *const attacker);
+static inline void   resetAttributes           (CHARACTER *const character);
+static inline void   combatLoop                (CHARACTER *const character1, CHARACTER *const character2);
+static inline void   removeEnemy               (CHARACTER *character);
+static inline void   printCharTurn             (const CHARTYPE type);
+static inline void   printCharAttack           (const char *const name);
+static inline void   charTurn                  (CHARACTER *const attacker, CHARACTER *const defender);
 //---------------------------------------------- define --------------------------------------------------
 
 //---------------------------------------------- enums ---------------------------------------------------
 
-
 //---------------------------------------------- typedefs ------------------------------------------------
 
-
 //---------------------------------------------- structs -------------------------------------------------
-
 
 //---------------------------------------------- global vars ---------------------------------------------
 
 //---------------------------------------------- code ----------------------------------------------------
 
+static inline void printCharTurn(const CHARTYPE type) {
+	char c[18];
+	switch(type) {
+		case SWORDSMAN: 
+			snprintf(c,18,"Swordsman's turn");
+			break;
+		case SPEARMAN:  
+			snprintf(c,18,"Spearman's turn");
+			break;
+		case MAGE:      
+			snprintf(c,18,"Mage's turn");
+			break;
+		case WOLF:      
+			snprintf(c,18,"Wolf's turn");
+			break;
+		case ARCHER:    
+			snprintf(c,18,"Archer's turn");
+			break;
+		case BEAR:      
+			snprintf(c,18,"Bear's turn");
+			break;
+		case MONSTER:   
+			snprintf(c,18,"Monster's turn");
+			break;
+		case SKELETON: 
+			snprintf(c,18,"Skeleton's turn");
+			break;
+		case COMPWOLF:
+			snprintf(c,18,"pet wolf's turn");
+			break;
+		case PLAYERTYPE:    
+			snprintf(c,18,"Player's turn");
+			break;
+		case NUM_CHARTYPE: //FALLTHROUGH
+		default: snprintf(c,6,"error"); //shouldnt get here, but if it does ill know.
+			 break;
+	}
+	printToCombatPrompt(0,0,c);
+}
+
+static inline void printCharAttack(const char *const name) {
+	char c[25];
+	snprintf(c,25,"%s attacks",name);
+	printToCombatPrompt(0,1,c);
+}
+
 //print primary attack message for character
-static void printCharRegularAttack(CHARTYPE type, const char *const defender_name) {
+static inline void printCharRegularAttack(const CHARTYPE type, const char *const defender_name) {
 	char c[47];
 	switch(type) {
 		case SWORDSMAN: 
@@ -61,6 +109,9 @@ static void printCharRegularAttack(CHARTYPE type, const char *const defender_nam
 		case SKELETON: 
 			snprintf(c,47,"hit %s with his big ass sword",defender_name);
 			break;
+		case COMPWOLF:    
+			snprintf(c,47,"bit %s with its sharp fangs",defender_name);
+			break;
 		case PLAYERTYPE:    
 			snprintf(c,47,"hit %s with their sword",defender_name);
 			break;
@@ -68,11 +119,11 @@ static void printCharRegularAttack(CHARTYPE type, const char *const defender_nam
 		default: snprintf(c,6,"error"); //shouldnt get here, but if it does ill know.
 			 break;
 	}
-	printToPrompt(0,1,c);
+	printToCombatPrompt(0,2,c);
 }
 
 //print the alternative attack message for a character
-static void printCharReducedAttack(CHARTYPE type, const char *const defender_name) {
+static inline void printCharReducedAttack(const CHARTYPE type, const char *const defender_name) {
 	char c[50];
 	switch(type) {
 		case SWORDSMAN: 
@@ -83,7 +134,7 @@ static void printCharReducedAttack(CHARTYPE type, const char *const defender_nam
 			break;
 		case MAGE:      
 			snprintf(c,50,"hit %s with a bolt of lightning",defender_name);
-				break;
+			break;
 		case WOLF:      
 			snprintf(c,50,"scratched %s with its sharp claws",defender_name);
 			break;
@@ -99,6 +150,9 @@ static void printCharReducedAttack(CHARTYPE type, const char *const defender_nam
 		case SKELETON: 
 			snprintf(c,50,"did a spooky attack on %s",defender_name);
 			break;
+		case COMPWOLF:    
+			snprintf(c,50,"scratched %s with its sharp claws",defender_name);
+			break;
 		case PLAYERTYPE:    
 			snprintf(c,50,"hit %s with their sword",defender_name);
 			break;
@@ -106,19 +160,12 @@ static void printCharReducedAttack(CHARTYPE type, const char *const defender_nam
 		default: snprintf(c,6,"error"); //shouldnt get here, but if it does ill know.
 			 break;
 	}
-	printToPrompt(0,1,c);
+	printToCombatPrompt(0,2,c);
 }
 
 //calculate damage done and apply it to defender.
 static int dealDamage(const CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,const int crit) {
-	char c[52];
-	int damage = attacker->attack - defender->defense - attacker->flags->defending - attack_offset;
-	if(attack_offset == 0) {
-		printCharRegularAttack(attacker->type,defender->name);
-	}
-	else {
-		printCharReducedAttack(attacker->type,defender->name);
-	}
+	int damage = (attacker->attack - defender->defense) - attacker->flags->defending - attack_offset;
 	if(crit != 0) {
 		damage += defender->defense;   //crits ignore defense rating
 	}
@@ -126,8 +173,6 @@ static int dealDamage(const CHARACTER *const attacker,CHARACTER *const defender,
 		damage = 1;   //should do a min of 1 damage. 
 	}
 	defender->health -= damage;
-	snprintf(c,52,"dealing %d damage to %s",damage,defender->name);
-	printToPrompt(0,3,c);
 	return damage;
 }
 
@@ -136,7 +181,7 @@ static void makeElectrocuted(CHARACTER *const defender) {
 	char c[37];
 	defender->flags->electrocuted = 1;
 	snprintf(c,37,"%s is now electrocuted",defender->name);
-	printToPrompt(0,3,c);	
+	printToCombatPrompt(0,3,c);	
 }
 
 //apply bleeding to defender
@@ -144,7 +189,7 @@ static void makeBleeding(CHARACTER *const defender) {
 	char c[32];
 	defender->flags->bleeding = 3;
 	snprintf(c,32,"%s is now bleeding",defender->name);
-	printToPrompt(0,3,c);
+	printToCombatPrompt(0,3,c);
 }
 
 //apply the frightened attribute to defender
@@ -152,7 +197,7 @@ static void makeFrightened(CHARACTER *const defender) {
 	char c[35];
 	defender->flags->frightend = 1;
 	snprintf(c,35,"%s is now frightened",defender->name);
-	printToPrompt(0,3,c);
+	printToCombatPrompt(0,3,c);
 }
 
 //carry out a regular attack. roll twice, returns the number of successes.
@@ -169,8 +214,8 @@ static void counterAttack(CHARACTER *const attacker, const CHARACTER *const defe
 	char d[42];
 	snprintf(c,52,"%s dodges and counters with an attack",defender->name);
 	snprintf(d,42,"dealing %d to %s",dealDamage(defender,attacker,2,0),attacker->name);
-	printToPrompt(0,2,c);
-	printToPrompt(0,3,d);
+	printToCombatPrompt(0,2,c);
+	printToCombatPrompt(0,3,d);
 }
 
 //if attack does some effect, then apply it to defender by calling the corresponding function
@@ -192,16 +237,25 @@ static void applyEffect(CHARACTER *const defender,ATTACKTYPE type) {
 //after doing a regular attack, do damage and print out the info to prompt win
 static void regularDamage(CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,ATTACKTYPE attacktype) {
 	int crit = 0;
+	char c[42];
+	printCharAttack(attacker->name);
 	switch(regularAttack(attacker,defender)) {
-		case 0: printToPrompt(0,2,"missed.");
+		case 0: printToCombatPrompt(0,2,"missed.");
 			break;
 		case 2:	
 			crit = 1;	//critical hits ignore defender's defense rating.
-			printToPrompt(0,2,"scoring ciritcal hit.");
+			printToCombatPrompt(0,3,"scoring ciritcal hit.");
 			applyEffect(defender,attacktype);
 			//FALLTHROUGH
 		case 1:
-				dealDamage(attacker,defender,crit,attack_offset);
+			if (attack_offset) {
+				printCharRegularAttack(attacker->type,defender->name);
+			}
+			else {
+				printCharReducedAttack(attacker->type,defender->name);
+			}
+			snprintf(c,42,"dealing %d damage to %s",dealDamage(attacker,defender,attack_offset,crit),defender->name);
+			printToCombatPrompt(0,3+crit,c);
 			break;
 		case 3:
 			counterAttack(attacker,defender);
@@ -217,7 +271,7 @@ static int switchToDefenseStance(CHARACTER *const attacker) {
 		attacker->flags->defending = 1;
 		char c[50];
 		snprintf(c,50,"%s switches to a defensive stance.",attacker->name);
-		printToPrompt(0,0,c);
+		printToCombatPrompt(0,1,c);
 		attacker->defense += 3;
 		return 1;
 	}
@@ -226,19 +280,32 @@ static int switchToDefenseStance(CHARACTER *const attacker) {
 
 //the player's turn while engaged in combat. 
 int playerAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCombatPrompt();
+	clearStatsWin();
+	updateStatsWin();
 	switch(getch()) {
-		case 1: regularDamage(attacker,defender,0,attacker->attacktype);
+		case '1': 
+			clearCombatPrompt();
+			if(rand() % 5 > 1) {
+				regularDamage(attacker,defender,0,REGULAR);
+			}
+			else {
+				regularDamage(attacker,defender,2,REGULAR);
+			}
 			break;
-		case 2: 
+		case '2': 
+			clearCombatPrompt();
 			if(switchToDefenseStance(attacker)) {
 				return 1;
 			}
 			else {
-				printToPrompt(0,0,"sorry, already in defensive stance");
+				printToCombatPrompt(0,1,"sorry, already in defensive stance");
 				getch();
 				return 0;
 			}
-		case 3: return accessPlayerInventory();
+		case '3': 
+			clearCombatPrompt();
+			return accessPlayerInventory();
 		default: return 0; 
 	}
 	return 1;
@@ -246,11 +313,13 @@ int playerAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int swordsmanAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 	switch(rand() % 10) {
 		case 0:
 		case 1:
 		case 2:
 		case 3://FALLTHROUGH
+			
 			regularDamage(attacker,defender,0,REGULAR); //attack with sword
 			break;
 		case 4: 
@@ -270,10 +339,12 @@ int swordsmanAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int mageAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 	switch(rand() % 10) {
 		case 0:
 		case 1:
 		case 2://FALLTHROUGH
+			
 			regularDamage(attacker,defender,0,ELECTRIC); //use lightening bolt
 			break;
 		case 3:
@@ -294,10 +365,12 @@ int mageAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int spearmanAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 	switch(rand() % 8) {
 		case 0:
 		case 1:
 		case 2://FALLTHROUGH
+			
 			regularDamage(attacker,defender,0,REGULAR); //atacks with spear point
 			break;
 		case 3:
@@ -316,10 +389,12 @@ int spearmanAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int wolfAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 	switch(rand() % 6) {
 		case 0:
 		case 1:
 		case 2://FALLTHROUGH
+			
 			regularDamage(attacker,defender,0,BLEEDING); //attacks with biting
 			break;
 		case 3:
@@ -335,11 +410,13 @@ int wolfAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int archerAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 	switch(rand() % 9) {
 		case 0:
 		case 1:
 		case 2://FALLTHROUGH
 			if(attacker->inventory[ARROW]->number_items > 0) {  //if archer has arrows, attack with them, else fall through to attack with short sword
+					
 				regularDamage(attacker,defender,0,REGULAR); //attacks with arrow
 				break;
 			}
@@ -361,10 +438,12 @@ int archerAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int bearAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 	switch(rand() % 6) {
 		case 0:
 		case 1:
 		case 2://FALLTHROUGH
+			
 			regularDamage(attacker,defender,0,BLEEDING); //attacks with claws
 			break;
 		case 3:
@@ -380,10 +459,12 @@ int bearAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int skeletonAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 	switch(rand() % 8) {
 		case 0:
 		case 1:
 		case 2: //FALLTHROUGH
+			
 			regularDamage(attacker,defender,0,REGULAR);  //attack with big ass sword
 			break;
 		case 3:
@@ -401,6 +482,7 @@ int skeletonAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 int monsterAttack(CHARACTER *const attacker,CHARACTER *const defender) {
+	printCharTurn(attacker->type);
 		switch(rand() % 6) {
 		case 0:
 		case 1:
@@ -421,7 +503,7 @@ int monsterAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 }
 
 //after battle, restore attributes to normal value in case they were changed.
-void resetAttributes(CHARACTER *const character) {
+static inline void resetAttributes(CHARACTER *const character) {
 	character->defense            =  character->max_defense;
 	character->attack             =  character->max_attack;
 	character->flags->missedturns =  0;
@@ -429,28 +511,68 @@ void resetAttributes(CHARACTER *const character) {
 	character->flags->defending   =  0;
 }
 
+static inline void removeEnemy(CHARACTER *character) {
+	ENEMY *temp = ENEMIES;
+	if(temp->character == character) {
+		ENEMIES = ENEMIES->next;
+	}
+	else {
+		while (temp->next->character != character) {
+			temp = temp->next;
+		}
+		temp->next = (temp->next->next != NULL)?  temp->next->next : NULL;
+	}
+	printTilePiece(character->current_loc->x,character->current_loc->y);
+}
+
+static inline void charTurn(CHARACTER *const attacker, CHARACTER *const defender) {
+	clearCombatPrompt();
+	while(attacker->charAttack(attacker,defender) == 0);
+	getch();
+}
+
 //loop through until one or both of combatants are dead. 
-void combatLoop(CHARACTER *const character1, CHARACTER *const character2) {
+static inline void combatLoop(CHARACTER *const character1, CHARACTER *const character2) {
 	while(character1->health > 0 && character2->health > 0) {
 		//if player is character2 and has a living companion, give random chance companion will be attacked instead of player
-		if(character2->has_comp && COMPANION->health > 0 && character1 != PLAYER) {
-			character1->charAttack(character1,(rand() % 5 < 3)? character2 : COMPANION);
-		}
-		else {
-			character1->charAttack(character1,character2);
-		}
+
+		charTurn(character1,(character2 == PLAYER && character2->has_comp && COMPANION->health > 0) ? ((rand() % 5 < 3)? character2 : COMPANION) : character2);
+
 		if(character2->health > 0) {
 		//if player is character1 and has a living companion, give random chance companion will be attacked instead of player
-			if(character1->has_comp && COMPANION->health > 0 && character2 != PLAYER) {
-				character2->charAttack(character1,(rand() % 5 < 3)? character1 : COMPANION);
-			}
-			else {
-				character2->charAttack(character1,character2);
-			}
+			charTurn(character2,(character1 == PLAYER && character1->has_comp && COMPANION->health > 0) ? ((rand() % 5 < 3)? character1 : COMPANION) : character1);
+		}
+		if(COMPANION != NULL && COMPANION->health > 0) {
+			charTurn(COMPANION,(character1 == PLAYER)? character2 : character1);
 		}
 	}
-	resetAttributes((character1->health > 0)? character1 : character2);
+	if(PLAYER->health > 0) {
+		resetAttributes(PLAYER);
+		if(PLAYER->has_comp) {
+			resetAttributes(COMPANION);
+		}
+		removeEnemy((character1 != PLAYER)? character1 : character2);
+	}
+}
 
+void engageCombat(CHARACTER *const character) {
+	if(character != PLAYER) {
+		printCombatScreen(character);
+		combatLoop(character,PLAYER);
+	}
+	else {
+		ENEMY *temp = ENEMIES;
+		while(temp != NULL) {
+			if(temp->character->current_loc->y == PLAYER->current_loc->y && temp->character->current_loc->x == PLAYER->current_loc->x){
+				printCombatScreen(temp->character);
+				combatLoop(PLAYER,temp->character);
+				break;
+			} 
+			temp = temp->next;
+		}
+	}
+	clearMainWin();
+	restoreMainWin();
 }
 
 //sets the function pointer to the function which governs that character's attack
@@ -465,6 +587,7 @@ attack_fpointer makeCharAtack(CHARTYPE type) {
 		case BEAR:         return  bearAttack;
 		case SKELETON:	   return  skeletonAttack;
 		case MONSTER:      return  monsterAttack;
+		case COMPWOLF:     return  wolfAttack;
 		case NUM_CHARTYPE: return  NULL; //should not be used. just here to make a case for each enum member
 		default :          return  NULL; 
 	}

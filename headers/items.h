@@ -40,8 +40,7 @@ int      computerCheckItem      (CHARACTER *const attacker,CHARACTER *const defe
 int      charUseItem            (CHARACTER *const attacker,CHARACTER *const defender,ITEMTYPE item);  
 ITEMTYPE chooseHealthItem       (const CHARACTER *const attacker);
 //---------------------------------------------- prototypes in other files -------------------------------
-void  printToPrompt      (const int x, const int y, const char *const str);
-void  restoreMainWin     (void); 
-void  clearMainWin       (void);
-void  copyMainWin        (void);
-void  clearPromptWin     (void);
+
+extern void  clearCombatPrompt    (void);
+extern void  printToCombatPrompt  (const int x, const int y, const char *const str);
+extern void  printCombatPrompt    (void);

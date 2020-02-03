@@ -7,6 +7,18 @@
 
 //---------------------------------------- global vars ----------------------------------------------
 
+//---------------------------------------- prototypes -----------------------------------------------
+static void	 printSwordsmanAttackScreen     (void);
+static void	 printMageAttackScreen          (void);
+static void	 printSpearmanAttackScreen      (void);
+static void	 printWolfAttackScreen          (void);
+static void	 printArcherAttackScreen        (void);
+static void	 printBearAttackScreen          (void);
+static void	 printMonsterAttackScreen       (void);
+static void	 printSkeletonAttackScreen      (void);
+static void	 printPlayerAttackScreen        (void);
+static void  printCompanionWolfAttackScreen (void);
+
 //---------------------------------------- code -----------------------------------------------------
 
 model_fpointer getCharModel(CHARTYPE type) {
@@ -20,14 +32,13 @@ model_fpointer getCharModel(CHARTYPE type) {
 		case MAGE:		   return printMageAttackScreen;
 		case BEAR:	       return printBearAttackScreen;
 		case MONSTER:      return printMonsterAttackScreen;
+		case COMPWOLF:     return printCompanionWolfAttackScreen;
 		case NUM_CHARTYPE: return printPlayerAttackScreen;  //should never be used, just to fill out all enum types
 		default:           return printPlayerAttackScreen;  //just a default case. shouldnt get here.
 	}
 }
 
-void printSwordsmanAttackScreen(void) {
-	#define SWORDSMAN_X WIDTH  - 24
-	#define SWORDSMAN_Y HEIGHT - 11
+static void printSwordsmanAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(GREENCHAR));
 	mvwprintw(MAIN_WIN,SWORDSMAN_Y    ,SWORDSMAN_X + 3,"O"); //head
 	mvwprintw(MAIN_WIN,SWORDSMAN_Y + 1,SWORDSMAN_X + 1,"__"); //left arm
@@ -49,9 +60,7 @@ void printSwordsmanAttackScreen(void) {
 	wattroff(MAIN_WIN,COLOR_PAIR(WHITECHAR));
 }
 
-void printMageAttackScreen(void) {
-	#define MAGE_X WIDTH  - 25
-	#define MAGE_Y HEIGHT - 11
+static void printMageAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(BLUECHAR));
 	mvwprintw(MAIN_WIN,MAGE_Y    ,MAGE_X + 2,"O"); //head
 	mvwprintw(MAIN_WIN,MAGE_Y + 1,MAGE_X    ,"__|__"); //upper torso and arms
@@ -73,9 +82,7 @@ void printMageAttackScreen(void) {
 
 }
 
-void printSpearmanAttackScreen(void) {
-	#define SPEARMAN_X WIDTH  - 25
-	#define SPEARMAN_Y HEIGHT - 11
+static void printSpearmanAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(YELLOWCHAR));
 	mvwprintw(MAIN_WIN,SPEARMAN_Y + 2,SPEARMAN_X + 1,"____ _ _ __"); //spear
 	wattroff(MAIN_WIN,COLOR_PAIR(YELLOWCHAR));	
@@ -91,9 +98,7 @@ void printSpearmanAttackScreen(void) {
 	wattroff(MAIN_WIN,COLOR_PAIR(WHITECHAR));
 }
 
-void printWolfAttackScreen(void) {
-	#define WOLF_X WIDTH  - 25
-	#define WOLF_Y HEIGHT - 10
+static void printWolfAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(WHITECHAR));
 	mvwprintw(MAIN_WIN,WOLF_Y    ,WOLF_X + 1,"_"); //top of head
 	mvwprintw(MAIN_WIN,WOLF_Y + 1,WOLF_X    ,"<"); //snout
@@ -109,9 +114,23 @@ void printWolfAttackScreen(void) {
 	wattroff(MAIN_WIN,COLOR_PAIR(YELLOWCHAR));
 }
 
-void printArcherAttackScreen(void) {
-	#define ARCHER_X WIDTH  - 25
-	#define ARCHER_Y HEIGHT - 12
+static void printCompanionWolfAttackScreen(void) {
+	wattron(  MAIN_WIN,COLOR_PAIR(WHITECHAR));
+	mvwprintw(MAIN_WIN,COMPWOLF_Y    ,COMPWOLF_X + 9 ,"_"); //top of head
+	mvwprintw(MAIN_WIN,COMPWOLF_Y + 1,COMPWOLF_X + 10 ,">"); //snout
+	wattroff( MAIN_WIN,COLOR_PAIR(WHITECHAR));
+	wattron(  MAIN_WIN,COLOR_PAIR(REDCHAR));
+	mvwprintw(MAIN_WIN,COMPWOLF_Y + 1,COMPWOLF_X + 9,"="); //eyes?
+	wattroff( MAIN_WIN,COLOR_PAIR(REDCHAR));	
+	wattron(  MAIN_WIN,COLOR_PAIR(CYANCHAR));
+	mvwprintw(MAIN_WIN,COMPWOLF_Y    ,COMPWOLF_X + 8,"/"); //ears
+	mvwprintw(MAIN_WIN,COMPWOLF_Y + 1,COMPWOLF_X    ,"\\_______/"); //upperbody
+	mvwprintw(MAIN_WIN,COMPWOLF_Y + 2,COMPWOLF_X + 1,"/\\    /\\"); //upper legs
+	mvwprintw(MAIN_WIN,COMPWOLF_Y + 3,COMPWOLF_X    ,"/  \\  /  \\"); //lower legs
+	wattroff( MAIN_WIN,COLOR_PAIR(CYANCHAR));
+}
+
+static void printArcherAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(BLUECHAR));
 	mvwprintw(MAIN_WIN,ARCHER_Y    ,ARCHER_X + 4,")"); //bow
 	mvwprintw(MAIN_WIN,ARCHER_Y + 1,ARCHER_X + 3,"/"); //bow
@@ -145,9 +164,7 @@ void printArcherAttackScreen(void) {
 	wattroff(MAIN_WIN,COLOR_PAIR(GREENCHAR));
 }
 
-void printBearAttackScreen(void) {
-	#define BEAR_X WIDTH  - 25
-	#define BEAR_Y HEIGHT - 12
+static void printBearAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(REDCHAR));
 	mvwprintw(MAIN_WIN,BEAR_Y    ,BEAR_X + 2,".");    //eyes 
 	wattroff(MAIN_WIN,COLOR_PAIR(REDCHAR));
@@ -170,9 +187,7 @@ void printBearAttackScreen(void) {
 	mvwprintw(MAIN_WIN,BEAR_Y + 5,BEAR_X + 14,"|");  //rear of legs
 }
 
-void printMonsterAttackScreen(void) {
-	#define MONSTER_X WIDTH  - 25
-	#define MONSTER_Y HEIGHT - 13
+static void printMonsterAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(YELLOWCHAR));
 	mvwprintw(MAIN_WIN,MONSTER_Y    ,MONSTER_X + 5,"(   )");   //face
 	mvwprintw(MAIN_WIN,MONSTER_Y + 2,MONSTER_X + 4 ,"\\-----/");  //upper body
@@ -201,9 +216,7 @@ void printMonsterAttackScreen(void) {
 	wattroff(MAIN_WIN,COLOR_PAIR(REDCHAR));
 }
 
-void printSkeletonAttackScreen(void) {
-	#define SKELETON_X WIDTH  - 25
-	#define SKELETON_Y HEIGHT - 14
+static void printSkeletonAttackScreen(void) {
 	wattron(MAIN_WIN,COLOR_PAIR(CYANCHAR));
 	mvwprintw(MAIN_WIN,SKELETON_Y + 3,SKELETON_X + 1,"|"); //sword handle
 	mvwprintw(MAIN_WIN,SKELETON_Y + 4,SKELETON_X + 1,"|"); //sword handle
@@ -224,9 +237,7 @@ void printSkeletonAttackScreen(void) {
 	wattroff(MAIN_WIN,COLOR_PAIR(WHITECHAR));
 }
 
-void printPlayerAttackScreen(void) {
-	#define PLAYER_X 15
-	#define PLAYER_Y HEIGHT - 11	
+static void printPlayerAttackScreen(void) {	
 	wattron(MAIN_WIN,COLOR_PAIR(WHITECHAR));
 	mvwprintw(MAIN_WIN,PLAYER_Y    ,PLAYER_X,"\\"); //sword
 	mvwprintw(MAIN_WIN,PLAYER_Y + 1,PLAYER_X +1,"\\"); //sword

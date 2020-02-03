@@ -3,6 +3,7 @@
 */
 
 //---------------------------------------------- headers -------------------------------------------------
+#pragma once
 #include "characters.h"
 #include "rooms.h"
 #include <stdlib.h>
@@ -26,7 +27,9 @@ void      computerTurn        (void);
 
 //---------------------------------------------- prototypes in other files -------------------------------
 
-extern int       moveCharacter       (const MOVEMENT next_move,CHARACTER *const character);
-extern MOVEMENT  getNextMovement     (const CHARACTER *const character);
-extern void  printToPrompt     (const int x, const int y, const char *const str);
+extern int       moveCharacter    (const MOVEMENT next_move,CHARACTER *const character);
+extern MOVEMENT  getNextMovement  (const CHARACTER *const character);
+extern void      printToPrompt    (const int x, const int y, const char *const str);
+extern int       checkIfEnemy     (void); 
+extern void      engageCombat     (CHARACTER *const character);
 //---------------------------------------------- code ----------------------------------------------------
