@@ -10,7 +10,21 @@
 static inline int   checkIfValidMove    (const MOVEMENT next_move,const int x,const int y);
 static        int   updateCharacterLoc  (const MOVEMENT next_move,CHARACTER *const character);
 static inline int   checkValidPiece     (const int x, const int y);
+
+//---------------------------------------- global vars ----------------------------------------------
+
 //---------------------------------------------- code ----------------------------------------------------
+
+int checkIfEnemy(void) {
+	ENEMY *temp = ENEMIES;
+	while(temp != NULL) {
+		if(temp->character->current_loc->x == PLAYER->current_loc->x && temp->character->current_loc->y == PLAYER->current_loc->y) {
+			return 1;
+		}
+		temp = temp->next;
+	}
+	return 0;
+}
 
 //computer players get their next movement direction here. they move towards player if they can.
 MOVEMENT getNextMovement(const CHARACTER *const character) {

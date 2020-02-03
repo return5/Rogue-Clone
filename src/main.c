@@ -5,7 +5,7 @@
 	license:       GPL 2.0
 	dependencies:  ncurses.
 				   C compiler with GNU C11 support.
-	version:       0.7
+	version:       0.8
 */
 
 //---------------------------------------- headers----------------------------------------------------

@@ -10,8 +10,8 @@
 //---------------------------------------- global vars ----------------------------------------------
 
 //---------------------------------------- prototypes ---------------------------------------------
-static void initPlayerRevealedLocations(void);
-
+static void initPlayerRevealedLocations (void);
+static void checkForStats               (void);
 //---------------------------------------- code -----------------------------------------------------
 
 //initializes ncurses screen functionality
@@ -151,6 +151,65 @@ void printCharacter(const CHARACTER *const character) {
 	wrefresh(MAIN_WIN);
 }
 
+static void checkForStats(void) {
+	int y = 3;
+	if(PLAYER->flags->poisoned) {
+		mvwprintw(STATS_WIN,y++,0,"you are poisoned");
+	}	
+	if(PLAYER->flags->onfire) {
+		mvwprintw(STATS_WIN,y++,0,"you are on fire");
+	}	
+	if(PLAYER->flags->bleeding) {
+		mvwprintw(STATS_WIN,y++,0,"you are bleeding");
+	}	
+	if(PLAYER->flags->frightend) {
+		mvwprintw(STATS_WIN,y++,0,"you are frightend");
+	}
+}
+
+void updateStatsWin(void) {
+	mvwprintw(STATS_WIN,0,0,"Health: %d",PLAYER->health);
+	mvwprintw(STATS_WIN,1,0,"Defense: %d",PLAYER->defense);
+	mvwprintw(STATS_WIN,2,0,"Attack: %d",PLAYER->attack);
+	checkForStats();
+	wrefresh(STATS_WIN);
+}
+
+void clearStatsWin(void) {
+	wclear(STATS_WIN);
+	wrefresh(STATS_WIN);
+}
+
+void clearCombatPrompt(void) {
+	wclear(COMBAT_PROMPT);
+	wrefresh(COMBAT_PROMPT);
+}
+
+void printCombatPrompt(void) {
+	mvwprintw(COMBAT_PROMPT,0,0,"It is your turn, please make a choice:");
+	mvwprintw(COMBAT_PROMPT,1,5,"1)attack");
+	mvwprintw(COMBAT_PROMPT,2,5,"2)switch to a defensive stance");
+	mvwprintw(COMBAT_PROMPT,3,5,"3)use item from inventory");
+	wrefresh(COMBAT_PROMPT);
+}
+
+void printToCombatPrompt(const int x, const int y, const char *const str) {
+	mvwprintw(COMBAT_PROMPT,y,x,"%s",str);
+	wrefresh(COMBAT_PROMPT);
+}
+
+void printCombatScreen(const CHARACTER *const character) {
+	copyMainWin();
+	clearMainWin();
+	printCombatPrompt();
+	PLAYER->printCharModel();
+	character->printCharModel();
+	if(PLAYER->has_comp && COMPANION->health > 0) {
+		COMPANION->printCharModel();
+	}
+	wrefresh(MAIN_WIN);
+}
+
 //go through each ENEMY in the ENEMEIES linked list and send them one by one to printCharacter()
 void printAllEnemies(void) {
 	ENEMY *head = ENEMIES;
@@ -190,8 +249,10 @@ static void initPlayerRevealedLocations(void) {
 
 //when game starts show player and reveal the tiles around them.
 void initPlayerOnMap(void) {
-	printCharacter(PLAYER);
 	initPlayerRevealedLocations();
+	printWorldMap();
+	printCharacter(PLAYER);
+	updateStatsWin();
 }
 
 void updateMap(const CHARACTER *const character) {
@@ -218,13 +279,19 @@ void initColors(void) {
 void initWindow(void) {
 	MAIN_WIN      = newwin(HEIGHT,WIDTH,1,1);
 	TEMP_WIN      = newwin(HEIGHT,WIDTH,1,1);
-	PROMPT_WIN    = newwin(3,50,1,WIDTH+3);
+	COMBAT_PROMPT = newwin(5,60,COMBATPROMPTY,COMBATPROMPTX);
+	PROMPT_WIN    = newwin(4,52,1,WIDTH+3);
+	STATS_WIN     = newwin(11,25,16,WIDTH+3);
 	MAIN_BORDER   = newwin(HEIGHT+2,WIDTH+2,0,0);
-	PROMPT_BORDER = newwin(5,52,0,WIDTH+2);
+	PROMPT_BORDER = newwin(6,54,0,WIDTH+2);
+	STATS_BORDER  = newwin(13,27,15,WIDTH+2);
 	wborder(MAIN_BORDER,'|','|','-', '-', '+', '+', '+', '+');
 	wborder(PROMPT_BORDER,'|','|','-', '-', '+', '+', '+', '+');
+	wborder(STATS_BORDER,'|','|','-', '-', '+', '+', '+', '+');
 	wrefresh(MAIN_WIN);
 	wrefresh(PROMPT_WIN);
 	wrefresh(MAIN_BORDER);
 	wrefresh(PROMPT_BORDER);
+	wrefresh(STATS_BORDER);
+	wrefresh(STATS_WIN);
 }
