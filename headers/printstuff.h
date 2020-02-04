@@ -1,9 +1,7 @@
 //---------------------------------------- headers -----------------------------------------------
 #pragma once
 #include <ncurses.h>
-#include "characters.h"
-#include "worldmap.h"
-#include "rooms.h"
+#include "gamepieces.h"
 
 //---------------------------------------------- define --------------------------------------------------
 #define COMBATPROMPTY HEIGHT - 5

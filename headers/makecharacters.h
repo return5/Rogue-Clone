@@ -1,6 +1,6 @@
 //---------------------------------------------- headers----------------------------------------------------
-#include "characters.h"
-#include "rooms.h"
+#pragma  once
+#include "gamepieces.h"
 #include <stdlib.h>
 #include <stdio.h>  //snprintf
 

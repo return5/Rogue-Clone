@@ -1,6 +1,6 @@
 //---------------------------------------- headers -----------------------------------------------
-#pragma once
-#include "rooms.h"
+#pragma  once
+#include "gamepieces.h"
 //----------------------------------------------- variables ---------------------------------------
 extern int START_OVER;
 //---------------------------------------- prototypes ---------------------------------------------
@@ -25,4 +25,5 @@ extern void  selectClass       (void);
 extern void  printClassSelect  (void);
 extern void  playerTurn        (void);
 extern void  computerTurn      (void);
-extern void  initPlayerOnMap   (void);
+extern void  updateWorldMap    (void);
+extern void  makeItemsOnMap    (void);

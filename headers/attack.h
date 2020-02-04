@@ -3,8 +3,8 @@
 */
 
 //---------------------------------------------- headers -------------------------------------------------
-#pragma once
-#include "characters.h"
+#pragma  once
+#include "gamepieces.h"
 #include <stdlib.h> 
 #include <ncurses.h>
 
@@ -21,6 +21,7 @@
 extern CHARACTER  *PLAYER;
 extern CHARACTER  *COMPANION;
 extern ENEMY      *ENEMIES;
+extern int         PLAY;
 //---------------------------------------------- prototypes ----------------------------------------------
 int              playerAttack     (CHARACTER *const attacker,CHARACTER *const defender);
 int              swordsmanAttack  (CHARACTER *const attacker,CHARACTER *const defender);

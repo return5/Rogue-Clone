@@ -3,7 +3,8 @@
 */
 
 //---------------------------------------------- headers -------------------------------------------------
-#include "characters.h"
+#pragma  once
+#include "gamepieces.h"
 #include <stdlib.h>	   //malloc
 #include <stdio.h>  //snprintf
 #include <ncurses.h>
@@ -19,7 +20,9 @@
 
 
 //---------------------------------------------- global vars ---------------------------------------------
-extern CHARACTER *PLAYER;
+extern CHARACTER  *PLAYER;
+extern ROOMSARRAY *ROOMS;
+       ITEMONMAP  *LOOSEITEMS;
 
 //---------------------------------------------- prototypes ----------------------------------------------
 ITEM     **makeCharInventory    (CHARTYPE type);
@@ -38,7 +41,8 @@ int      useItem                (CHARACTER *const attacker,CHARACTER *const defe
 int      playerDisplayInventory (void);
 int      computerCheckItem      (CHARACTER *const attacker,CHARACTER *const defender);
 int      charUseItem            (CHARACTER *const attacker,CHARACTER *const defender,ITEMTYPE item);  
-ITEMTYPE chooseHealthItem       (const CHARACTER *const attacker);
+void     makeItemsOnMap         (void);
+void     removeItemOffMap       (const ITEM *const item);
 //---------------------------------------------- prototypes in other files -------------------------------
 
 extern void  clearCombatPrompt    (void);

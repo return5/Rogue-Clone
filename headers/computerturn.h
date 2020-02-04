@@ -3,9 +3,8 @@
 */
 
 //---------------------------------------------- headers -------------------------------------------------
-#pragma once
-#include "characters.h"
-#include "rooms.h"
+#pragma  once
+#include "gamepieces.h"
 #include <stdlib.h>
 #include <ncurses.h>
 //---------------------------------------------- define --------------------------------------------------

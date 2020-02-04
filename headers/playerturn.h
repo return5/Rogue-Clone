@@ -3,9 +3,8 @@
 */
 
 //---------------------------------------------- headers -------------------------------------------------
-#pragma once
-#include "rooms.h"
-#include "characters.h"
+#pragma  once
+#include "gamepieces.h"
 #include <ncurses.h>
 //---------------------------------------------- define --------------------------------------------------
 
@@ -22,6 +21,7 @@
 extern int         PLAY;
 extern CHARACTER  *PLAYER;
 extern CHARACTER  *COMPANION;
+extern ITEMONMAP  *LOOSEITEMS;
 //extern WINDOW      *MAIN_WIN;
 
 //---------------------------------------------- prototypes ----------------------------------------------
@@ -46,3 +46,4 @@ extern void         printWorldMap          (void);
 extern void         printTilePiece         (const int x, const int y);
 extern int          checkIfEnemy           (void); 
 extern void         engageCombat           (CHARACTER *const character);
+extern void         removeItemOffMap       (const ITEM *const item);
