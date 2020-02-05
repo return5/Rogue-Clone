@@ -8,6 +8,14 @@
 //---------------------------------------------- prototypes ----------------------------------------------
 static inline void   printCharRegularAttack    (const CHARTYPE type, const char *const defender_name);
 static inline void   printCharReducedAttack    (const CHARTYPE type, const char *const defender_name);
+static inline void   resetAttributes           (CHARACTER *const character);
+static inline void   combatLoop                (CHARACTER *const character1, CHARACTER *const character2);
+static inline void   removeEnemy               (CHARACTER *character);
+static inline void   printCharTurn             (const CHARTYPE type);
+static inline void   printCharAttack           (const char *const name);
+static inline void   charTurn                  (CHARACTER *const attacker, CHARACTER *const defender);
+static inline char   *playerRegularAttack      (const char *const defender_name);
+static inline char   *playerReducedAttack      (const char *const defender_name);
 static        int    dealDamage                (const CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,const int crit);
 static        void   makeElectrocuted          (CHARACTER *const character);
 static        void   makeBleeding              (CHARACTER *const defender);
@@ -17,12 +25,8 @@ static        void   counterAttack             (CHARACTER *const attacker, const
 static        void   applyEffect               (CHARACTER *const defender,ATTACKTYPE type);
 static        void   regularDamage             (CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,ATTACKTYPE attacktype);
 static        int    switchToDefenseStance     (CHARACTER *const attacker);
-static inline void   resetAttributes           (CHARACTER *const character);
-static inline void   combatLoop                (CHARACTER *const character1, CHARACTER *const character2);
-static inline void   removeEnemy               (CHARACTER *character);
-static inline void   printCharTurn             (const CHARTYPE type);
-static inline void   printCharAttack           (const char *const name);
-static inline void   charTurn                  (CHARACTER *const attacker, CHARACTER *const defender);
+
+
 //---------------------------------------------- define --------------------------------------------------
 
 //---------------------------------------------- enums ---------------------------------------------------
@@ -31,12 +35,51 @@ static inline void   charTurn                  (CHARACTER *const attacker, CHARA
 
 //---------------------------------------------- structs -------------------------------------------------
 
+
 //---------------------------------------------- global vars ---------------------------------------------
 
 //---------------------------------------------- code ----------------------------------------------------
 
+static inline char *playerRegularAttack(const char *const defender_name) {
+	char *const c = malloc(43);
+	switch(PLAYER_CLASS) {
+		case WARRIOR       : 
+			snprintf(c,42,"cleaves %s with their axe",defender_name);
+			break;
+		case PLAYER_ARCHER : 
+			snprintf(c,42,"shot %s with an arrow",defender_name); 
+			break;
+		case ANIMAL_WHISPER: 
+			snprintf(c,42,"hit %s with their staff",defender_name); 
+			break;
+		default:
+			snprintf(c,6,"error");
+			break;
+	}
+	return c;
+}
+
+static inline char *playerReducedAttack(const char *const defender_name) {
+	char *const c = malloc(43);
+	switch(PLAYER_CLASS) {
+		case WARRIOR       : 
+			snprintf(c,45,"hit %s with back of the axe",defender_name);
+			break;
+		case PLAYER_ARCHER : 
+			snprintf(c,45,"cut %s with their short sowrd",defender_name); 
+			break;
+		case ANIMAL_WHISPER: 
+			snprintf(c,45,"hit %s with a small rock",defender_name); 
+			break;
+		default:
+			snprintf(c,6,"error");
+			break;
+	}
+	return c;
+}
+
 static inline void printCharTurn(const CHARTYPE type) {
-	char c[18];
+	char *c = malloc(18);
 	switch(type) {
 		case SWORDSMAN: 
 			snprintf(c,18,"Swordsman's turn");
@@ -73,6 +116,7 @@ static inline void printCharTurn(const CHARTYPE type) {
 			 break;
 	}
 	printToCombatPrompt(0,0,c);
+	free(c);
 }
 
 static inline void printCharAttack(const char *const name) {
@@ -83,7 +127,7 @@ static inline void printCharAttack(const char *const name) {
 
 //print primary attack message for character
 static inline void printCharRegularAttack(const CHARTYPE type, const char *const defender_name) {
-	char c[47];
+	char *c = malloc(47);
 	switch(type) {
 		case SWORDSMAN: 
 			snprintf(c,47,"struck %s with his sword",defender_name);
@@ -113,18 +157,20 @@ static inline void printCharRegularAttack(const CHARTYPE type, const char *const
 			snprintf(c,47,"bit %s with its sharp fangs",defender_name);
 			break;
 		case PLAYERTYPE:    
-			snprintf(c,47,"hit %s with their sword",defender_name);
+			free(c);
+			c = playerRegularAttack(defender_name);
 			break;
 		case NUM_CHARTYPE: //FALLTHROUGH
 		default: snprintf(c,6,"error"); //shouldnt get here, but if it does ill know.
 			 break;
 	}
 	printToCombatPrompt(0,2,c);
+	free(c);
 }
 
 //print the alternative attack message for a character
 static inline void printCharReducedAttack(const CHARTYPE type, const char *const defender_name) {
-	char c[50];
+	char *c = malloc(50);
 	switch(type) {
 		case SWORDSMAN: 
 			snprintf(c,50,"hit %s with his sword pommel",defender_name);
@@ -153,14 +199,16 @@ static inline void printCharReducedAttack(const CHARTYPE type, const char *const
 		case COMPWOLF:    
 			snprintf(c,50,"scratched %s with its sharp claws",defender_name);
 			break;
-		case PLAYERTYPE:    
-			snprintf(c,50,"hit %s with their sword",defender_name);
+		case PLAYERTYPE: 
+			free(c);   
+			c = playerReducedAttack(defender_name);
 			break;
 		case NUM_CHARTYPE: //FALLTHROUGH
 		default: snprintf(c,6,"error"); //shouldnt get here, but if it does ill know.
 			 break;
 	}
 	printToCombatPrompt(0,2,c);
+	free(c);
 }
 
 //calculate damage done and apply it to defender.
@@ -533,7 +581,7 @@ static inline void charTurn(CHARACTER *const attacker, CHARACTER *const defender
 
 //loop through until one or both of combatants are dead. 
 static inline void combatLoop(CHARACTER *const character1, CHARACTER *const character2) {
-	while(character1->health > 0 && character2->health > 0) {
+	while(character1->health > 0 && character2->health > 0 && PLAY) {
 		//if player is character2 and has a living companion, give random chance companion will be attacked instead of player
 
 		charTurn(character1,(character2 == PLAYER && character2->has_comp && COMPANION->health > 0) ? ((rand() % 5 < 3)? character2 : COMPANION) : character2);

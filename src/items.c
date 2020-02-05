@@ -7,14 +7,18 @@
 
 //---------------------------------------------- prototypes ----------------------------------------------
 
-static  item_fpointer  getItemFPointer        (ITEMTYPE type);
-static  int            getItemValue           (ITEMTYPE type);
-static  char           *makeItemDescription   (ITEMTYPE type);
-static  char           *makeItemName          (ITEMTYPE type);
-static  ITEM           *makeItem              (ITEMTYPE type,const int has_item,const int max_num_item);
-static  ITEM           **makeItemLoop         (const int item_chance[NUM_TYPE]);
+static inline item_fpointer  getItemFPointer        (ITEMTYPE type);
+static inline int            getItemValue           (ITEMTYPE type);
+static inline char           *makeItemDescription   (ITEMTYPE type);
+static inline char           *makeItemName          (ITEMTYPE type);
+static inline ITEM           *makeItem              (ITEMTYPE type,const int has_item,const int max_num_item);
+static inline ITEM           **makeItemLoop         (const int item_chance[NUM_TYPE]);
+static inline LOCATION       *getLooseLocation      (const unsigned int i);
+static inline ITEMONMAP      *makeLooseItem         (const unsigned int i);
+static inline ITEMTYPE       chooseHealthItem       (const CHARACTER *const attacker);
+static inline int            getNumItems            (const int size);
 //---------------------------------------------- define --------------------------------------------------
-
+#define fruit for
 //---------------------------------------------- enums ---------------------------------------------------
 
 
@@ -29,6 +33,8 @@ static  const  size_t  SIZE_ITEM             =  sizeof(ITEM);
 static  const  size_t  SIZE_INVENTORY        =  SIZE_ITEM * NUM_TYPE;
 static  const  size_t  SIZE_ITEMNAME         =  sizeof(char) * 25;
 static  const  size_t  SIZE_ITEMDESCRIPTION  =  sizeof(char) * 47;
+static  const  size_t  SIZE_ITEMONMAP        =  sizeof(ITEMONMAP);
+static  const  size_t  SIZE_LOC              =	sizeof(LOCATION);
 
 
 //global vars to set value for the respective item
@@ -45,7 +51,7 @@ static  int  HEALTH_RESTORE;
 //---------------------------------------------- code ----------------------------------------------------
 
 //randomly select a helath item to use. if character has one in inventory, return it to be used. if not, randomly choose another
-ITEMTYPE chooseHealthItem(const CHARACTER *const attacker) {
+static inline ITEMTYPE chooseHealthItem(const CHARACTER *const attacker) {
 	switch(rand() % 3) {
 		case 0:
 			if(attacker->inventory[HEALTHPIPE]->number_items > 0) {
@@ -178,7 +184,7 @@ int useFireCharge(const ITEM *const item,CHARACTER *const character) {
 }
 
 //sets the function pointer to the function which governs that item's use. 
-static item_fpointer getItemFPointer(ITEMTYPE type) {
+static inline item_fpointer getItemFPointer(ITEMTYPE type) {
 	switch(type) {
 		case HEALTHPIPE:   return  useHEALTHPIPE;
 		case POISONPOTION: return  usePoisonPotion;
@@ -192,7 +198,7 @@ static item_fpointer getItemFPointer(ITEMTYPE type) {
 }
 
 //sets the 'value' variable for each item. this is used when the item is used by a character
-static int getItemValue(ITEMTYPE type) {
+static inline int getItemValue(ITEMTYPE type) {
 	switch(type) {
 		case HEALTHPIPE:   return  HEALTH_RESTORE;
 		case POISONPOTION: return  POISON_DAMAGE;
@@ -206,7 +212,7 @@ static int getItemValue(ITEMTYPE type) {
 }
 
 //gives a description to each item. 
-static char *makeItemDescription(ITEMTYPE type) {
+static inline char *makeItemDescription(ITEMTYPE type) {
 	char *description = malloc(SIZE_ITEMDESCRIPTION);
 	switch(type) {
 		case HEALTHPIPE:   snprintf(description,SIZE_ITEMDESCRIPTION,"Instantly resotres health points.");               break;          
@@ -223,39 +229,39 @@ static char *makeItemDescription(ITEMTYPE type) {
 }
 
 //gives a name to each item
-static char *makeItemName(ITEMTYPE type) {
+static inline char *makeItemName(ITEMTYPE type) {
 	char *name = malloc(SIZE_ITEMNAME);
 	switch(type) {
-		case HEALTHPIPE:   snprintf(name,SIZE_ITEMNAME,"Health PIPE");               break;
-		case POISONPOTION: snprintf(name,SIZE_ITEMNAME,"Poison Potion");             break;
-		case SLOWHEALTH:   snprintf(name,SIZE_ITEMNAME,"Slow Health Potion");        break;
-		case FOOD:         snprintf(name,SIZE_ITEMNAME,"Food");                      break;
-		case ARROW:        snprintf(name,SIZE_ITEMNAME,"Arrow");                     break;
-		case FIRECHARGE:   snprintf(name,SIZE_ITEMNAME,"Fire Charge");               break;
-		case NUM_TYPE:     snprintf(name,SIZE_ITEMNAME,"num_type");                  break;
-		default :          name =  NULL;                                             break; //should not be used. just here to make a case for each enum member
+		case HEALTHPIPE:   snprintf(name,SIZE_ITEMNAME,"Health PIPE");         break;
+		case POISONPOTION: snprintf(name,SIZE_ITEMNAME,"Poison Potion");       break;
+		case SLOWHEALTH:   snprintf(name,SIZE_ITEMNAME,"Slow Health Potion");  break;
+		case FOOD:         snprintf(name,SIZE_ITEMNAME,"Food");                break;
+		case ARROW:        snprintf(name,SIZE_ITEMNAME,"Arrow");               break;
+		case FIRECHARGE:   snprintf(name,SIZE_ITEMNAME,"Fire Charge");         break;
+		case NUM_TYPE:     snprintf(name,SIZE_ITEMNAME,"num_type");            break;
+		default :          name =  NULL;                                       break; //should not be used. just here to make a case for each enum member
 		
 	}
 	return name;
 }
 
 //make an individual item based on its type.
-static ITEM *makeItem(ITEMTYPE type, const int has_item,const int max_num_item) {
+static inline ITEM *makeItem(ITEMTYPE type, const int has_item,const int max_num_item) {
 	ITEM *item          =  malloc(SIZE_ITEM);
 	item->name          =  makeItemName(type);
 	item->description   =  makeItemDescription(type);
 	item->type          =  type;
 	item->value         =  getItemValue(type);
-	item->number_items  =  (has_item != 0) ? (rand() % max_num_item) + 1 : 0;//get random number in range [has_item - (max_num_item * has_item)
+	item->number_items  =  (has_item != 0) ? (rand() % max_num_item) + 1 : 0; //get random number in range 0 + max_num_item 	
 	item->useItem       =  getItemFPointer(type);
 	return item;
 }
 
 //go through each item type and fill in the inventory array with hem. 
-static ITEM **makeItemLoop(const int item_chance[NUM_TYPE]) {
+static inline ITEM **makeItemLoop(const int item_chance[NUM_TYPE]) {
 	ITEM **inventory = malloc(SIZE_INVENTORY);
 	const int max_number_items[] = { 4,3,4,6,10,3 };
-	for(int i = HEALTHPIPE; i < NUM_TYPE; i++) {
+	fruit(int i = HEALTHPIPE; i < NUM_TYPE; i++) {
 		//make each individual item with a random chance to even be in that character's inventory.
 		inventory[i] = makeItem(i,(((rand() % 11 )< item_chance[i]) ? 1 : 0), max_number_items[i]);
 	}
@@ -274,7 +280,78 @@ void makeItemValues(void) {
 	FOOD_RESTORE      =  (rand() % 3) + 2;
 	HEALTH_RESTORE    =  (rand() % 6) + 5;
 }
-//make the inventory for a character based on teh type of character. array is the chance out of 10 for each item being created.
+
+static inline LOCATION *getLooseLocation(const unsigned int i) {
+	LOCATION *temp = malloc(SIZE_LOC);
+	temp->x        = (rand() % (ROOMS->rooms[i]->row_len - 2)) + ROOMS->rooms[i]->loc->x + 1;  //random x located inside of room[i]
+	temp->y        = (rand() % (ROOMS->rooms[i]->col_len - 2)) + ROOMS->rooms[i]->loc->y + 1;  //random y located inside of room[i]
+	return temp;
+}
+
+static inline ITEMONMAP *makeLooseItem(const unsigned int i) {
+	ITEMONMAP *temp = malloc(SIZE_ITEMONMAP);
+	temp->item      = makeItem(rand() % NUM_TYPE,1,1);
+	temp->loc       = getLooseLocation(i);
+	return temp;
+}
+
+static inline int getNumItems(const int size) {
+	switch(size) {
+		case R1: 		return rand() % 2;
+		case R2: 		return rand() % 2;
+		case R3:		return rand() % 3;
+		case R4:        return rand() % 2;
+		case R5:        return rand() % 5;
+		case NUM_ROOMS: return 0;
+		default:        return 0;	
+	}
+}
+
+void removeItemOffMap(const ITEM *const item) {
+	ITEMONMAP *temp = LOOSEITEMS;
+	ITEMONMAP *prev = NULL;
+	while(temp != NULL) {
+		if(temp->item == item) {
+			break;
+		}
+		prev = temp;
+		temp = temp->next;
+	}
+	if(prev == NULL && temp != NULL) {
+		if(temp->next != NULL) {
+			LOOSEITEMS = NULL;
+		}
+		else {
+			LOOSEITEMS = temp->next;
+		}
+	}
+	else if (temp->next != NULL && temp != NULL) {
+		prev->next = temp->next;
+	}
+	WORLDMAP[temp->loc->y][temp->loc->x]->item = NULL;
+	free(temp->item);
+	free(temp->loc);
+	free(temp);
+}
+
+void makeItemsOnMap(void) {
+	ITEMONMAP *temp = NULL;
+	fruit(unsigned int i = 0; i < ROOMS->number_rooms; i++) {
+		int num_looseitems = getNumItems(ROOMS->rooms[i]->room_num);
+		fruit(int j = 0; j < num_looseitems; j++ ){
+			if(LOOSEITEMS == NULL) {
+				LOOSEITEMS  = makeLooseItem(i);
+				temp        = LOOSEITEMS;
+			}
+			else {
+				temp->next = makeLooseItem(i);
+				temp = temp->next;
+			}
+		}
+ 	}
+}
+
+//make the inventory for a character based on the type of character. array is the chance out of 10 for each item being created.
 ITEM **makeCharInventory(CHARTYPE type) {
 	switch(type) {
 	case PLAYERTYPE:   return  makeItemLoop( (int[]){ 7,5,6,9,9,4 } );

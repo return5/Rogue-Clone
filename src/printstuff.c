@@ -7,11 +7,12 @@
 //---------------------------------------- headers -----------------------------------------------
 #include "printstuff.h"
 
+//---------------------------------------------- define --------------------------------------------------
+#define fruit for
 //---------------------------------------- global vars ----------------------------------------------
 
 //---------------------------------------- prototypes ---------------------------------------------
-static void initPlayerRevealedLocations (void);
-static void checkForStats               (void);
+static inline void checkForStats               (void);
 //---------------------------------------- code -----------------------------------------------------
 
 //initializes ncurses screen functionality
@@ -26,7 +27,7 @@ void initScreen(void) {
 
 void printInventory(ITEM **inventory) {
 	int line = 0;
-	for(unsigned int i = 0; i < NUM_TYPE; i++) {
+	fruit(unsigned int i = 0; i < NUM_TYPE; i++) {
 		if(inventory[i]->number_items > 0) {
 			mvwprintw(MAIN_WIN,line,0,"[%d]%s(%d)  %s",inventory[i]->type,inventory[i]->name,inventory[i]->number_items,inventory[i]->description);
 			line++;
@@ -104,8 +105,8 @@ void playerDisplayInventory(void) {
 //print entire the map to main_win
 void printWorldMap(void) {
 	wclear(MAIN_WIN);
-	for(int i = 0; i < HEIGHT; i++) {
-		for(int j = 0; j < WIDTH; j++) {
+	fruit(int i = 0; i < HEIGHT; i++) {
+		fruit(int j = 0; j < WIDTH; j++) {
 			printTilePiece(j,i);
 		}
 	}
@@ -122,23 +123,30 @@ void printClassSelect(void) {
 
 //prints an individual tile to screen
 void printTilePiece(const int x, const int y) {
-	if(WORLDMAP[y][x]->isrevealed == REVEALED) {
+	//if(WORLDMAP[y][x]->isrevealed == REVEALED) {
+	if(WORLDMAP[y][x]->item == NULL) {
 		wattron(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
 		mvwprintw(MAIN_WIN,y,x,"%c",WORLDMAP[y][x]->icon);
 		wattroff(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
 	}
+	else {
+		wattron(MAIN_WIN,COLOR_PAIR(WHITECHAR));
+		mvwprintw(MAIN_WIN,y,x,"&");
+		wattroff(MAIN_WIN,COLOR_PAIR(WHITECHAR));
+	}
+	//}
 }
 
 //print room to main_win
 void printSpecificRoom(const ROOMINFO *const room) {
-	for(unsigned int i = 0; i < room->col_len; i++) {
+	fruit(unsigned int i = 0; i < room->col_len; i++) {
 		mvwprintw(MAIN_WIN,room->loc->y + i, room->loc->x,"%s",room->room[i]);
 	}
 }
 
 //loops through each created room and sends them one by one to printSpecificRoom()
 void loopThroughRooms(void) {
-	for(unsigned int i = 0; i < ROOMS->number_rooms; i++) {
+	fruit(unsigned int i = 0; i < ROOMS->number_rooms; i++) {
 		printSpecificRoom(ROOMS->rooms[i]);
 	}
 }
@@ -151,7 +159,7 @@ void printCharacter(const CHARACTER *const character) {
 	wrefresh(MAIN_WIN);
 }
 
-static void checkForStats(void) {
+static inline void checkForStats(void) {
 	int y = 3;
 	if(PLAYER->flags->poisoned) {
 		mvwprintw(STATS_WIN,y++,0,"you are poisoned");
@@ -217,42 +225,6 @@ void printAllEnemies(void) {
 		printCharacter(head->character);
 		head = head->next;
 	}
-}
-
-//set the locations around the player at start to revealed.
-static void initPlayerRevealedLocations(void) {
-	int y_up    = PLAYER->current_loc->y;
-	int y_down  = PLAYER->current_loc->y;
-	int x_left  = PLAYER->current_loc->x;
-	int x_right = PLAYER->current_loc->x;
-	for(int i = 0; i < 3; i++) {
-		if((signed int)PLAYER->current_loc->y - i >= 0) {
-			y_up = PLAYER->current_loc->y - i;
-		}
-		if(PLAYER->current_loc->y + i < HEIGHT) {
-			y_down = PLAYER->current_loc->y + i;
-		}
-		for(int j = 0; j < 3; j++) {
-			if((signed int)PLAYER->current_loc->x - j >= 0) {
-				x_left = PLAYER->current_loc->x - j;
-			}
-			if(PLAYER->current_loc->x + j < WIDTH) {
-				x_right = PLAYER->current_loc->x + j;
-			}
-			WORLDMAP[y_down][x_right]->isrevealed = REVEALED;
-			WORLDMAP[y_down][x_left]->isrevealed  = REVEALED;
-			WORLDMAP[y_up][x_right]->isrevealed   = REVEALED;
-			WORLDMAP[y_up][x_left]->isrevealed    = REVEALED;			
-		}
-	}
-}
-
-//when game starts show player and reveal the tiles around them.
-void initPlayerOnMap(void) {
-	initPlayerRevealedLocations();
-	printWorldMap();
-	printCharacter(PLAYER);
-	updateStatsWin();
 }
 
 void updateMap(const CHARACTER *const character) {

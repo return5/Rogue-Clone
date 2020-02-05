@@ -15,12 +15,13 @@ int PLAY = 1;
 //---------------------------------------- code -----------------------------------------------------
 
 void initalizeWorld(void) {
-	do {  //make the map,rooms, and paths
+	do {  //make the map,rooms,and paths
 		makeRooms();
 		initWorldMap();
 		START_OVER = 0;       //initialize this value to 0. it is used in makePassages inside makepath.c
 	} while(makePassages() > 100); //if makePasses gets stuck in loop,ususally because it can't connect two rooms, then make new map.
 	makeEnemies();	
+	makeItemsOnMap();	
 }
 
 void gameLoop(void) {
@@ -38,10 +39,10 @@ int main(void) {
 	makeItemValues();  //set initial values for all the items 
 	printClassSelect();
 	selectClass();
-	initalizeWorld();	
+	initalizeWorld();
 	makePlayer();
+	updateWorldMap();
 	printWorldMap();
-	initPlayerOnMap();
 	gameLoop();
 	return 0;
 }

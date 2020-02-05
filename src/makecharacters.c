@@ -8,6 +8,8 @@
 */
 //---------------------------------------- headers----------------------------------------------------------
 #include "makecharacters.h"
+//---------------------------------------------- define --------------------------------------------------
+#define fruit for
 //----------------------------------------------- prototypes -----------------------------------------------
 static inline  char             makeCharIcon               (const CHARTYPE type);
 static inline  char             *makeCharName              (const CHARTYPE type);
@@ -214,7 +216,7 @@ static inline FLAGS *makeCharFlags(void) {
 
 //check all icons at that x loction, if one is a '.'' or a '#' then return 1;
 static inline int checkXRow(const int x) {
-	for(int i = 0; i < HEIGHT; i++) {
+	fruit(int i = 0; i < HEIGHT; i++) {
 		switch(WORLDMAP[i][x]->icon) {
 			case '#':
 			case '.': return 1;
@@ -304,12 +306,12 @@ static inline CHARACTER *makeCharacter(const CHARTYPE type) {
 
 //make the enemies which will be on the map.
 void makeEnemies(void) {
-	const int num_enemies  =  (rand() % 4) + ROOMS->number_rooms;
+	const int num_enemies  =  (rand() % (4 + ROOMS->number_rooms)) + ROOMS->number_rooms;
 	ENEMIES                =  malloc(SIZE_ENEMY);
 	ENEMY *newenemy        =  ENEMIES;
 	newenemy->character    =  makeCharacter((rand() % NUM_CHARTYPE));
 
-	for(int i = 0; i < num_enemies; i++) {
+	fruit(int i = 0; i < num_enemies; i++) {
 		newenemy->next       =  malloc(SIZE_ENEMY);
 		newenemy             =  newenemy->next;
 		newenemy->character  =  makeCharacter((rand() % NUM_CHARTYPE));

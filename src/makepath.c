@@ -216,7 +216,7 @@ static int buildPath(const PATHLOCATION *const start,const int end_i) {
 	PATHLOCATION  *path                 =  malloc(SIZE_PATHLOCATION);
 	*path                               =  *start;		//init path to the start location
 	WORLDMAP[start->y][start->x]->icon  =  '%';			 //start door. 	
-	WORLDMAP[path->y][path->x]->color   =  WHITE;			
+	WORLDMAP[path->y][path->x]->color   =  WHITECHAR;			
 	const unsigned int end_x            =  ROOMS->rooms[end_i]->loc->x + (ROOMS->rooms[end_i]->row_len) / 2;  //middle x coordinate of the room where path will end
 	const unsigned int end_y            =  ROOMS->rooms[end_i]->loc->y + (ROOMS->rooms[end_i]->col_len) / 2;  //middle y coordinate of room where path will end
 	unsigned int count                  =  0;  //counter for counting number of times it loops
@@ -224,7 +224,7 @@ static int buildPath(const PATHLOCATION *const start,const int end_i) {
 		dir = getValidMoves(path,end_i);
 		path = getNextPath(dir,path,end_x,end_y);
 		WORLDMAP[path->y][path->x]->icon = '#';
-		WORLDMAP[path->y][path->x]->color = WHITE;
+		WORLDMAP[path->y][path->x]->color = WHITECHAR;
 		count++;
 	}
 	WORLDMAP[path->y][path->x]->icon = '%';
@@ -308,7 +308,6 @@ int makePassages(void) {
 				PATHLOCATION *start_loc = pickStartLocation(i);  //pick the starting location for the path
 				int end_i               = chooseEndOfPath(i,j,previous);  //pick the room to end the path on.
 				if (buildPath(start_loc,end_i) == 0) {          //if buildPath fails. 
-					free(previous);
 					startOver();
 					break;
 				}

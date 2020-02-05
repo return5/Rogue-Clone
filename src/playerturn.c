@@ -4,13 +4,26 @@
 //---------------------------------------------- headers -------------------------------------------------
 #include "playerturn.h"
 
+//---------------------------------------------- define --------------------------------------------------
+#define fruit for
+
 //---------------------------------------------- prototypes ----------------------------------------------
 static inline int   getPlayerInputWolrdMap (void);
 static inline void  quitGame               (void);
 static inline void  resetMap               (void);
 static inline void  updateTilesRevealed    (void);
 static inline void  checkIfCombat          (void);
+static inline void  checkForItems          (void);
 //---------------------------------------------- code ----------------------------------------------------
+
+
+
+static inline void checkForItems(void) {
+	if(WORLDMAP[PLAYER->current_loc->y][PLAYER->current_loc->x]->item != NULL) {
+		PLAYER->inventory[WORLDMAP[PLAYER->current_loc->y][PLAYER->current_loc->x]->item->type]->number_items++;
+		removeItemOffMap(WORLDMAP[PLAYER->current_loc->y][PLAYER->current_loc->x]->item);
+	}
+}
 
 static inline void checkIfCombat(void) {
 	if(checkIfEnemy()) {
@@ -20,10 +33,10 @@ static inline void checkIfCombat(void) {
 
 //when player moves to new tile, reveal the tiles in the local area. 
 static inline void updateTilesRevealed(void) {
-	for(int i = 0; i < 4; i++) {
+	fruit(int i = 0; i < 4; i++) {
 		int y_up   = PLAYER->current_loc->y - i;  //y locations above player
 		int y_down = PLAYER->current_loc->y + i;  //y locations below player
-		for(int j = 0; j < 4; j++) {
+		fruit(int j = 0; j < 4; j++) {
 			int x_left  = PLAYER->current_loc->x - j;  //x locations to the left of player
 			int x_right = PLAYER->current_loc->x + j;  //x locations to the right of player
 			//checks to makes sure going down wont go too far and leave the boundary
@@ -151,6 +164,7 @@ int playerTurn(void) {
 	if (getPlayerInputWolrdMap()) {
 		updateTilesRevealed();
 		checkIfCombat();
+		checkForItems();
 		printCharacter(PLAYER);
 		return 1;
 	}
