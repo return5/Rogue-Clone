@@ -7,17 +7,21 @@
 //---------------------------------------------- headers -------------------------------------------------
 #include "movement.h"
 //---------------------------------------------- prototypes ----------------------------------------------
-static inline int   checkIfValidMove    (const MOVEMENT next_move,const int x,const int y);
-static        int   updateCharacterLoc  (const MOVEMENT next_move,CHARACTER *const character);
-static inline int   checkValidPiece     (const int x, const int y);
+static inline int      checkIfValidMove    (const MOVEMENT next_move,const int x,const int y);
+static        int      updateCharacterLoc  (const MOVEMENT next_move,CHARACTER *const character);
+static inline int      checkValidPiece     (const int x, const int y);
+static inline MOVEMENT moveRightIsValid    (const CHARACTER *const character);
+static inline MOVEMENT moveLeftIsValid     (const CHARACTER *const character);
+static inline MOVEMENT moveDownIsValid     (const CHARACTER *const character);
+static inline MOVEMENT moveUpIsValid       (const CHARACTER *const character);
 
-//---------------------------------------- global vars ----------------------------------------------
+//--------------------------------------------- global vars ----------------------------------------------
 
 //---------------------------------------------- code ----------------------------------------------------
 
 int checkIfEnemy(void) {
 	ENEMY *temp = ENEMIES;
-	while(temp != NULL) {
+	while(temp != NULLEMS) {
 		if(temp->character->current_loc->x == PLAYER->current_loc->x && temp->character->current_loc->y == PLAYER->current_loc->y) {
 			return 1;
 		}
@@ -26,20 +30,73 @@ int checkIfEnemy(void) {
 	return 0;
 }
 
-//computer players get their next movement direction here. they move towards player if they can.
-MOVEMENT getNextMovement(const CHARACTER *const character) {
+static inline MOVEMENT moveRightIsValid(const CHARACTER *const character) {
+	if(character->current_loc->x < PLAYER->current_loc->x && checkIfValidMove(RIGHT,character->current_loc->x,character->current_loc->y)) {
+		return RIGHT;		
+	}
+	return NO_MOVE;
+}
+
+static inline MOVEMENT moveLeftIsValid(const CHARACTER *const character) {
+	if(character->current_loc->x > PLAYER->current_loc->x && checkIfValidMove(LEFT,character->current_loc->x,character->current_loc->y)) {
+		return LEFT;		
+	}
+	return NO_MOVE;
+
+}
+
+static inline MOVEMENT moveDownIsValid(const CHARACTER *const character) {
+	if(character->current_loc->y < PLAYER->current_loc->y && checkIfValidMove(DOWN,character->current_loc->x,character->current_loc->y)) {
+		return DOWN;
+	}
+	return NO_MOVE;
+}
+
+static inline MOVEMENT moveUpIsValid(const CHARACTER *const character) {
 	if(character->current_loc->y > PLAYER->current_loc->y && checkIfValidMove(UP,character->current_loc->x,character->current_loc->y)) {
 		return UP;
 	}
-	else if(character->current_loc->y < PLAYER->current_loc->y && checkIfValidMove(DOWN,character->current_loc->x,character->current_loc->y)) {
+	return NO_MOVE;
+}
+
+//computer players get their next movement direction here. they move towards player if they can. if two or more moves are valid, randomly select one of them
+MOVEMENT getNextMovement(const CHARACTER *const character) {
+	if(moveUpIsValid(character) == UP) {
+		if(moveLeftIsValid(character) == LEFT && rand() % 6 > 2) {
+			return LEFT;
+		}
+		else if(moveRightIsValid(character) == RIGHT && rand() % 6 > 2) {
+			return RIGHT;
+		}
+		return UP;
+	}
+	else if(moveDownIsValid(character) == DOWN) {
+		if(moveLeftIsValid(character) == LEFT && rand() % 6 > 2) {
+			return LEFT;
+		}
+		else if(moveRightIsValid(character) == RIGHT && rand() % 6 > 2) {
+			return RIGHT;
+		}
 		return DOWN;
 	}
 
-	else if(character->current_loc->x > PLAYER->current_loc->x && checkIfValidMove(LEFT,character->current_loc->x,character->current_loc->y)) {
+	else if(moveLeftIsValid(character) == LEFT) {
+		if(moveUpIsValid(character) == UP && rand() % 6 > 2) {
+			return UP;
+		}
+		else if(moveDownIsValid(character) == DOWN && rand() % 6 > 2) {
+			return DOWN;
+		}
 		return LEFT;		
 	}
 
-	else if(character->current_loc->x < PLAYER->current_loc->x && checkIfValidMove(RIGHT,character->current_loc->x,character->current_loc->y)) {
+	else if(moveRightIsValid(character) == RIGHT) {
+		if(moveUpIsValid(character) == UP && rand() % 6 > 2) {
+			return UP;
+		}
+		else if(moveDownIsValid(character) == DOWN && rand() % 6 > 2) {
+			return DOWN;
+		}
 		return RIGHT;		
 	}
 	else {
