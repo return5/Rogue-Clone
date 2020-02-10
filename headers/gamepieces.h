@@ -3,8 +3,9 @@
 
 //---------------------------------------- define -------------------------------------------------
 #pragma  once
-#define  HEIGHT 30     //height of main_win   make sure to match these values with the ones in charmodels.h
-#define  WIDTH  70	  //width of game_win   make sure to match these values with the ones in charmodels.h
+#define  HEIGHT  30     //height of main_win   make sure to match these values with the ones in charmodels.h
+#define  WIDTH   70	  //width of game_win   make sure to match these values with the ones in charmodels.h
+#define  NULLEMS NULL
 
 //---------------------------------------- enums -------------------------------------------------
 
@@ -52,7 +53,12 @@ extern   PATHARRAY   *PATHS;
 extern   TILE        *WORLDMAP[HEIGHT][WIDTH];
 extern   CHARACTER   *PLAYER;
 extern   ITEMONMAP   *LOOSEITEMS;
-
+extern   int         FIRE_DAMAGE;
+extern	 int         POISON_DAMAGE;
+extern	 int         SLOW_RESTORE;
+extern	 int         FOOD_RESTORE;
+extern   int         HEALTH_RESTORE;
+extern   int         BLEEDING_DAMAGE;
 //---------------------------------------- structs ------------------------------------------------------
 struct LOCATION {
 	unsigned int x,y;
@@ -60,10 +66,8 @@ struct LOCATION {
 
 struct ITEM {
 	char                *name, *description;  //name of item, description of item
-	ITEMTYPE            type;                //value for type of item. used for sorting items
-	int                 value;              //generic value for what it does, like how much health to damage/heal.
+	ITEMTYPE            type;                //type of item. 
 	unsigned int        number_items;      //number of items
-	item_fpointer       useItem;          //function pointer to function which allows the use of the item
 };
 
 struct FLAGS {
@@ -75,28 +79,28 @@ struct FLAGS {
 	unsigned  short  defending;
 	unsigned  short  electrocuted; 
 	unsigned  short  frightend;
-	unsigned  short  missedturns;
-	unsigned  short  damageperturn;
+	unsigned  short  missedturn;
 };
 
 struct CHARACTER {
-	char              *name;		              //name of character
-	char              icon;			 		     //icon to displat on screen			   
-	CHARTYPE          type;					    //type of character
-	int               health,max_health;       //character health
-	int               attack,max_attack;	  //character attack values  
-	int               defense,max_defense;   //character defense values
-	int               level;                //current level of character
-	int               dodge;               //chance to dodge an attack
-	int 			  attack_chance;      //chance to success when attack
-	int               has_comp;			 //flag for if character has a companion
-	MOVEMENT          prev_move;       //previous direction character moved
-	LOCATION          *current_loc;   //current location for character
-	LOCATION          *prev_loc;      //character's location on the previous turn
-	FLAGS             *flags;         //struct holding status flags
-	CHARCOLOR         color;         //color of the icon to display
-	ITEM              **inventory;   //inventory of items being held
-	attack_fpointer   charAttack;    //function pointer which pointers to function which a character uses to attack
+	char              *name;		                                //name of character
+	char              icon;			 	                  	     //icon to displat on screen			   
+	CHARTYPE          type;				                  	    //type of character
+	int               health,max_health;                         //character health
+	int               attack,max_attack;                  	  //character attack values  
+	int               defense,max_defense;                   //character defense values
+	int               level;                                  //current level of character
+	int               dodge;                                 //chance to dodge an attack
+	int 			  attack_chance,max_achance;           //max chance to success when attack
+	int               has_comp;			                   //flag for if character has a companion
+	int 			  incombat;
+	MOVEMENT          prev_move;                         //previous direction character moved
+	LOCATION          *current_loc;                     //current location for character
+	LOCATION          *prev_loc;                        //character's location on the previous turn
+	FLAGS             *flags;                           //struct holding status flags
+	CHARCOLOR         color;                           //color of the icon to display
+	ITEM              **inventory;                     //inventory of items being held
+	attack_fpointer   charAttack;                      //function pointer which pointers to function which a character uses to attack
 	model_fpointer    printCharModel;
 };
 
