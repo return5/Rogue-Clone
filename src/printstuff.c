@@ -44,13 +44,13 @@ CHARACTER *itemUseOn(void) {
 	switch(getch()) {
 		case '1': return PLAYER;
 		case '2': return COMPANION;
-		case '3': return NULL;
-		default: return itemUseOn();
+		case '3': return NULLEMS;
+		default : return itemUseOn();
 	}
 }
 
 void printAttackScreen(const CHARACTER *const enemy) {
-	copyMainWin();
+	copyMainWinToCombat();
 	clearMainWin();
 	if(PLAYER->has_comp == 1) {
 		COMPANION->printCharModel();
@@ -60,10 +60,36 @@ void printAttackScreen(const CHARACTER *const enemy) {
 }
 
 //restore main_win to what it was when saved using copyMainwin()
-void restoreMainWin(void) {
-	wclear(MAIN_WIN);
-	overwrite(TEMP_WIN,MAIN_WIN);
+void restoreMainWinFromInventory(void) {
+	clearMainWin();
+	overwrite(INVENTORY_WIN,MAIN_WIN);
+	clearInventoryWin();
 	wrefresh(MAIN_WIN);
+}
+
+void clearInventoryWin(void) {
+	wclear(INVENTORY_WIN);
+	wrefresh(INVENTORY_WIN);
+}
+
+//make a copy of main_win as it currently is.
+void copyMainWinToInventory(void) {
+	clearInventoryWin();
+	overwrite(MAIN_WIN,INVENTORY_WIN);
+	clearMainWin();
+}
+
+//restore main_win to what it was when saved using copyMainwin()
+void restoreMainWinFromCombat(void) {
+	clearMainWin();
+	overwrite(COMBAT_WIN,MAIN_WIN);
+	clearCombatWin();
+	wrefresh(MAIN_WIN);
+}
+
+void clearCombatWin(void) {
+	wclear(COMBAT_WIN);
+	wrefresh(COMBAT_WIN);
 }
 
 void clearMainWin(void) {
@@ -72,9 +98,10 @@ void clearMainWin(void) {
 }
 
 //make a copy of main_win as it currently is.
-void copyMainWin(void) {
-	wclear(TEMP_WIN);
-	overwrite(MAIN_WIN,TEMP_WIN);
+void copyMainWinToCombat(void) {
+	clearCombatWin();
+	overwrite(MAIN_WIN,COMBAT_WIN);
+	clearMainWin();
 }
 
 void printToPrompt(const int x, const int y, const char *const str) {
@@ -88,15 +115,14 @@ void clearPromptWin(void) {
 }
 
 void printAreYouSure(void) {
-	copyMainWin();
+	copyMainWinToCombat();
 	clearMainWin();
 	mvwprintw(MAIN_WIN,HEIGHT/3,WIDTH/3 - 4,"are you sure you want to quit(y/n)?");
 	wrefresh(MAIN_WIN);
 }
 
 void playerDisplayInventory(void) {
-	copyMainWin();
-	clearMainWin();
+	copyMainWinToInventory();
 	clearPromptWin();
 	printInventory(PLAYER->inventory);
 	printToPrompt(0,0,"press number of item you wish to use");
@@ -124,7 +150,7 @@ void printClassSelect(void) {
 //prints an individual tile to screen
 void printTilePiece(const int x, const int y) {
 	//if(WORLDMAP[y][x]->isrevealed == REVEALED) {
-	if(WORLDMAP[y][x]->item == NULL) {
+	if(WORLDMAP[y][x]->item == NULLEMS) {
 		wattron(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
 		mvwprintw(MAIN_WIN,y,x,"%c",WORLDMAP[y][x]->icon);
 		wattroff(MAIN_WIN,COLOR_PAIR(WORLDMAP[y][x]->color));
@@ -207,8 +233,7 @@ void printToCombatPrompt(const int x, const int y, const char *const str) {
 }
 
 void printCombatScreen(const CHARACTER *const character) {
-	copyMainWin();
-	clearMainWin();
+	copyMainWinToCombat();
 	printCombatPrompt();
 	PLAYER->printCharModel();
 	character->printCharModel();
@@ -221,7 +246,7 @@ void printCombatScreen(const CHARACTER *const character) {
 //go through each ENEMY in the ENEMEIES linked list and send them one by one to printCharacter()
 void printAllEnemies(void) {
 	ENEMY *head = ENEMIES;
-	while(head != NULL) {	
+	while(head != NULLEMS) {	
 		printCharacter(head->character);
 		head = head->next;
 	}
@@ -250,7 +275,8 @@ void initColors(void) {
 //creates the MAIN_WIN window. 
 void initWindow(void) {
 	MAIN_WIN      = newwin(HEIGHT,WIDTH,1,1);
-	TEMP_WIN      = newwin(HEIGHT,WIDTH,1,1);
+	COMBAT_WIN    = newwin(HEIGHT,WIDTH,1,1);
+	INVENTORY_WIN = newwin(HEIGHT,WIDTH,1,1);
 	COMBAT_PROMPT = newwin(5,60,COMBATPROMPTY,COMBATPROMPTX);
 	PROMPT_WIN    = newwin(4,52,1,WIDTH+3);
 	STATS_WIN     = newwin(11,25,16,WIDTH+3);

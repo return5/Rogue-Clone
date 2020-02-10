@@ -72,7 +72,7 @@ static inline int getPlayerMaxDefense(void) {
 //get player max attack based upon player class
 static inline int getPlayerMaxAttack(void) {
 	switch(PLAYER_CLASS) {
-		case WARRIOR       : return (rand() % 5) + 8;
+		case WARRIOR       : return (rand() % 5) + 7;
 		case PLAYER_ARCHER : return (rand() % 3) + 7;
 		case ANIMAL_WHISPER: return (rand() % 3) + 6;
 		default:             return 0;
@@ -165,15 +165,15 @@ static inline int makeCharMaxDefense(const CHARTYPE type) {
 static inline int makeCharMaxAttack(const CHARTYPE type) {
 	switch(type) {
 		case PLAYERTYPE:   return  getPlayerMaxAttack();
-		case SWORDSMAN:    return  6;
-		case MAGE:         return  5;
-		case SPEARMAN:     return  7;
-		case WOLF:         return  5;
-		case ARCHER:       return  6;
-		case BEAR:         return  6;
-		case MONSTER:      return  7;
-		case SKELETON:     return  8;
-		case COMPWOLF:     return  7;
+		case SWORDSMAN:    return  (rand() % 4) + 5;
+		case MAGE:         return  (rand() % 6) + 4;
+		case SPEARMAN:     return  (rand() % 6) + 6;
+		case WOLF:         return  (rand() % 6) + 5;
+		case ARCHER:       return  (rand() % 6) + 4;
+		case MONSTER:      return  (rand() % 5) + 8;
+		case SKELETON:     return  (rand() % 4) + 7;
+		case BEAR:         return  (rand() % 5) + 6;
+		case COMPWOLF:     return  (rand() % 7) + 6;
 		case NUM_CHARTYPE: return  0; //should not be used. just here to make a case for each enum member
 		default :          return  0; 
 	}
@@ -207,10 +207,9 @@ static inline FLAGS *makeCharFlags(void) {
 	flags->slowhealth    =  0;
 	flags->bleeding      =  0;
 	flags->defending     =  0;
-	flags->missedturns   =  0;
+	flags->missedturn    =  0;
 	flags->electrocuted  =  0;
 	flags->frightend     =  0;
-	flags->damageperturn =  0;
 	return flags;
 }
 
@@ -294,9 +293,11 @@ static inline CHARACTER *makeCharacter(const CHARTYPE type) {
 	character->charAttack     =  makeCharAtack(type);
 	character->dodge 	      =  makeCharDodge(type);
 	character->attack_chance  =  makeCharAttackChance(type);
+	character->max_achance    = character->attack_chance;
 	character->color          =  getCharColor(type);
 	character->printCharModel =  getCharModel(type);
 	character->has_comp       =  0;
+	character->incombat       =  0;
 	character->prev_move      =  rand() % 4;
 	character->health         =  character->max_health   =  makeCharMaxHealth(type);
 	character->attack         =  character->max_attack   =  makeCharMaxAttack(type);

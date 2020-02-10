@@ -12,10 +12,11 @@ static inline void   resetAttributes           (CHARACTER *const character);
 static inline void   combatLoop                (CHARACTER *const character1, CHARACTER *const character2);
 static inline void   removeEnemy               (CHARACTER *character);
 static inline void   printCharTurn             (const CHARTYPE type);
-static inline void   printCharAttack           (const char *const name);
+static inline void   printCharAttack           (const char *const attacker_name, const char *const defender_name);
 static inline void   charTurn                  (CHARACTER *const attacker, CHARACTER *const defender);
 static inline char   *playerRegularAttack      (const char *const defender_name);
 static inline char   *playerReducedAttack      (const char *const defender_name);
+static inline void   freeCharacterNode         (ENEMY *const node);
 static        int    dealDamage                (const CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,const int crit);
 static        void   makeElectrocuted          (CHARACTER *const character);
 static        void   makeBleeding              (CHARACTER *const defender);
@@ -39,6 +40,119 @@ static        int    switchToDefenseStance     (CHARACTER *const attacker);
 //---------------------------------------------- global vars ---------------------------------------------
 
 //---------------------------------------------- code ----------------------------------------------------
+
+
+inline void recoverFoodHealth(CHARACTER *const character) {
+	if(character->incombat == 1) {
+		char str[40];
+		snprintf(str,40,"%s recovered %d health",character->name,FOOD_RESTORE);
+		printToCombatPrompt(0,1,str);
+		getch();
+		clearCombatPrompt();
+	}
+	character->health += FOOD_RESTORE;
+	character->health = (character->health > character->max_health)? character->max_health : character->health;	
+}
+
+inline void applyPosionDamage(CHARACTER *const character) {
+	if(character->incombat == 1) {
+		char str[40];
+		snprintf(str,40,"%s took %d posion damage",character->name,-1 * POISON_DAMAGE);
+		printToCombatPrompt(0,1,str);
+		getch();
+		clearCombatPrompt();
+	}
+	character->health += POISON_DAMAGE;
+	character->health = (character->health > character->max_health)? character->max_health : character->health;
+}
+
+inline void recoverSlowHealth(CHARACTER *const character) {
+	if(character->incombat == 1) {
+		char str[40];
+		snprintf(str,40,"%s recovered %d health",character->name,SLOW_RESTORE);
+		printToCombatPrompt(0,1,str);
+		getch();
+		clearCombatPrompt();
+	}
+	character->health += SLOW_RESTORE;
+	character->health = (character->health > character->max_health)? character->max_health : character->health;	
+}
+
+inline void applyFireDamage(CHARACTER *const character) {
+	if(character->incombat == 1) {
+		char str[40];
+		snprintf(str,40,"%s took %d fire dmage",character->name,-1 * FIRE_DAMAGE);
+		printToCombatPrompt(0,1,str);
+		getch();
+		clearCombatPrompt();
+	}
+	character->health += FIRE_DAMAGE;
+	character->health = (character->health > character->max_health)? character->max_health : character->health;
+}
+
+inline void applyBleedingDamage(CHARACTER *const character) {
+	if(character->incombat == 1) {
+		char str[50];
+		snprintf(str,50,"%s took %d damage from bleeding",character->name,-1 * BLEEDING_DAMAGE);
+		printToCombatPrompt(0,1,str);
+		getch();
+		clearCombatPrompt();
+	}
+	character->health += BLEEDING_DAMAGE;
+	character->health = (character->health > character->max_health)? character->max_health : character->health;
+}
+
+inline void applyElectrocution(CHARACTER *const character) {
+	char str[52];
+	snprintf(str,52,"%s lost a turn from being electrocuted",character->name);
+	printToCombatPrompt(0,1,str);
+	getch();
+	clearCombatPrompt();
+	character->flags->missedturn = 1;
+}
+
+inline void applyFrightend(CHARACTER *const character) {
+	char str[52];
+	snprintf(str,52,"%s is scared, attack chance is lowered",character->name);
+	printToCombatPrompt(0,1,str);
+	getch();
+	clearCombatPrompt();
+	character->attack_chance = character->max_achance - 2;
+}
+
+void checkEffects(CHARACTER *const character) {
+	if(character->flags->poisoned > 0) {
+		applyPosionDamage(character);
+		character->flags->poisoned--;
+	}	
+	if(character->flags->ate > 0) {
+		recoverFoodHealth(character);
+		character->flags->ate--;
+	}	
+	if(character->flags->onfire > 0) {
+		applyFireDamage(character);
+		character->flags->onfire--;
+	}	
+	if(character->flags->slowhealth > 0) {
+		recoverSlowHealth(character);
+		character->flags->slowhealth--;
+	}	
+	if(character->flags->bleeding > 0) {
+		applyBleedingDamage(character);
+		character->flags->bleeding--;
+	}
+	if(character->flags->electrocuted > 0) {
+		applyElectrocution(character);
+		character->flags->electrocuted--;
+	}
+	if(character->flags->frightend > 0) {
+		applyFrightend(character);
+		character->flags->frightend--;
+	}
+	else {
+		character->attack_chance = character->max_achance;
+	}
+}
 
 static inline char *playerRegularAttack(const char *const defender_name) {
 	char *const c = malloc(43);
@@ -119,9 +233,9 @@ static inline void printCharTurn(const CHARTYPE type) {
 	free(c);
 }
 
-static inline void printCharAttack(const char *const name) {
-	char c[25];
-	snprintf(c,25,"%s attacks",name);
+static inline void printCharAttack(const char *const attacker_name, const char *const defender_name) {
+	char c[42];
+	snprintf(c,42,"%s attacks %s",attacker_name,defender_name);
 	printToCombatPrompt(0,1,c);
 }
 
@@ -286,7 +400,7 @@ static void applyEffect(CHARACTER *const defender,ATTACKTYPE type) {
 static void regularDamage(CHARACTER *const attacker,CHARACTER *const defender,const int attack_offset,ATTACKTYPE attacktype) {
 	int crit = 0;
 	char c[42];
-	printCharAttack(attacker->name);
+	printCharAttack(attacker->name, defender->name);
 	switch(regularAttack(attacker,defender)) {
 		case 0: printToCombatPrompt(0,2,"missed.");
 			break;
@@ -311,6 +425,7 @@ static void regularDamage(CHARACTER *const attacker,CHARACTER *const defender,co
 		default: //do nothing
 			break;
 	}
+	getch();
 }
 
 //if attacker isnt in a defensive stance, then switch to one.
@@ -321,6 +436,7 @@ static int switchToDefenseStance(CHARACTER *const attacker) {
 		snprintf(c,50,"%s switches to a defensive stance.",attacker->name);
 		printToCombatPrompt(0,1,c);
 		attacker->defense += 3;
+		getch();
 		return 1;
 	}
 	return 0;
@@ -352,8 +468,19 @@ int playerAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 				return 0;
 			}
 		case '3': 
-			clearCombatPrompt();
-			return accessPlayerInventory();
+			clearCombatPrompt();	
+			playerDisplayInventory();
+			int status = 0;
+			unsigned int choice = (getch() - '0');
+			if(PLAYER->has_comp == 1) {
+				status = useItem(choice,itemUseOn(),defender);
+			}
+			else {
+				status = useItem(choice,PLAYER,defender);
+			}
+			getch();
+			restoreMainWinFromInventory();
+			return status;
 		default: return 0; 
 	}
 	return 1;
@@ -552,31 +679,57 @@ int monsterAttack(CHARACTER *const attacker,CHARACTER *const defender) {
 
 //after battle, restore attributes to normal value in case they were changed.
 static inline void resetAttributes(CHARACTER *const character) {
-	character->defense            =  character->max_defense;
-	character->attack             =  character->max_attack;
-	character->flags->missedturns =  0;
-	character->flags->frightend   =  0;
-	character->flags->defending   =  0;
+	character->defense              =  character->max_defense;
+	character->attack               =  character->max_attack;
+	character->incombat				=  0;
+	character->flags->missedturn    =  0;
+	character->flags->frightend     =  0;
+	character->flags->electrocuted  =  0;
+	character->flags->defending     =  0;
 }
 
-static inline void removeEnemy(CHARACTER *character) {
+static inline void freeCharacterNode(ENEMY *const node) {
+	free(node->character->name);
+	free(node->character->current_loc);
+	free(node->character->prev_loc);
+	free(node->character->flags);
+	free(node->character->inventory);
+	free(node);
+}
+
+static inline void removeEnemy(CHARACTER *const character) {
 	ENEMY *temp = ENEMIES;
-	if(temp->character == character) {
-		ENEMIES = ENEMIES->next;
+	ENEMY *prev = NULLEMS;
+	while(temp != NULLEMS) {
+		if(temp->character == character) {
+			break;
+		}
+		prev = temp;
+		temp = temp->next;
+		count++;
+	}
+	if(prev == NULLEMS && temp != NULLEMS) { //enemy to remove is first one in list
+		if(temp->next != NULLEMS) {
+			ENEMIES = temp->next;
+		}
+		else {
+			ENEMIES = NULLEMS;
+		}
+	}
+	else if(temp->next != NULLEMS && prev != NULLEMS) {
+		prev->next = temp->next;
 	}
 	else {
-		while (temp->next->character != character) {
-			temp = temp->next;
-		}
-		temp->next = (temp->next->next != NULL)?  temp->next->next : NULL;
+		prev->next = NULLEMS;
 	}
-	printTilePiece(character->current_loc->x,character->current_loc->y);
+	freeCharacterNode(temp);
 }
 
 static inline void charTurn(CHARACTER *const attacker, CHARACTER *const defender) {
 	clearCombatPrompt();
+	checkEffects(attacker);
 	while(attacker->charAttack(attacker,defender) == 0);
-	getch();
+	//getch();
 }
 
 //loop through until one or both of combatants are dead. 
@@ -590,7 +743,7 @@ static inline void combatLoop(CHARACTER *const character1, CHARACTER *const char
 		//if player is character1 and has a living companion, give random chance companion will be attacked instead of player
 			charTurn(character2,(character1 == PLAYER && character1->has_comp && COMPANION->health > 0) ? ((rand() % 5 < 3)? character1 : COMPANION) : character1);
 		}
-		if(COMPANION != NULL && COMPANION->health > 0) {
+		if(COMPANION != NULLEMS && COMPANION->health > 0) {
 			charTurn(COMPANION,(character1 == PLAYER)? character2 : character1);
 		}
 	}
@@ -604,23 +757,25 @@ static inline void combatLoop(CHARACTER *const character1, CHARACTER *const char
 }
 
 void engageCombat(CHARACTER *const character) {
+	character->incombat = 1;
 	if(character != PLAYER) {
+		PLAYER->incombat = 1;
 		printCombatScreen(character);
 		combatLoop(character,PLAYER);
 	}
 	else {
 		ENEMY *temp = ENEMIES;
-		while(temp != NULL) {
+		while(temp != NULLEMS) {
 			if(temp->character->current_loc->y == PLAYER->current_loc->y && temp->character->current_loc->x == PLAYER->current_loc->x){
 				printCombatScreen(temp->character);
+				temp->character->incombat = 1;
 				combatLoop(PLAYER,temp->character);
 				break;
 			} 
 			temp = temp->next;
 		}
 	}
-	clearMainWin();
-	restoreMainWin();
+	restoreMainWinFromCombat();
 }
 
 //sets the function pointer to the function which governs that character's attack
@@ -636,7 +791,7 @@ attack_fpointer makeCharAtack(CHARTYPE type) {
 		case SKELETON:	   return  skeletonAttack;
 		case MONSTER:      return  monsterAttack;
 		case COMPWOLF:     return  wolfAttack;
-		case NUM_CHARTYPE: return  NULL; //should not be used. just here to make a case for each enum member
-		default :          return  NULL; 
+		case NUM_CHARTYPE: return  NULLEMS; //should not be used. just here to make a case for each enum member
+		default :          return  NULLEMS; 
 	}
 }

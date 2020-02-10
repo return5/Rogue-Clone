@@ -52,7 +52,7 @@ static inline void initPlayerRevealedLocations(void) {
 
 static inline void putItemsOnMap(void) {
 	ITEMONMAP *temp = LOOSEITEMS;
-	while(temp != NULL) {
+	while(temp != NULLEMS) {
 		WORLDMAP[temp->loc->y][temp->loc->x]->item = temp->item;
 		temp = temp->next;
 	}
@@ -83,9 +83,9 @@ static inline void fillInWorldMap(void) {
 		for(int j = 0; j < WIDTH; j++) {
 			WORLDMAP[i][j]             =  malloc(SIZE_TILE);
 			WORLDMAP[i][j]->icon       =  ' ';
-			WORLDMAP[i][j]->item       =  NULL;
+			WORLDMAP[i][j]->item       =  NULLEMS;
 			WORLDMAP[i][j]->isrevealed =  NOT_REVEALED;
-			WORLDMAP[i][j]->room       =  NULL;
+			WORLDMAP[i][j]->room       =  NULLEMS;
 			WORLDMAP[i][j]->color      =  BLACKCHAR;
 		}
 	}

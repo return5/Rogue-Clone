@@ -158,8 +158,8 @@ static inline char **getRoomAr(NUMROOMS room_num) {
 		case R3:		return ROOM3;
 		case R4:        return ROOM4;
 		case R5:        return ROOM5;
-		case NUM_ROOMS: return NULL;
-		default:        return NULL;	
+		case NUM_ROOMS: return NULLEMS;
+		default:        return NULLEMS;	
 	}	
 }
 

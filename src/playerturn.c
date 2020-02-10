@@ -6,7 +6,7 @@
 
 //---------------------------------------------- define --------------------------------------------------
 #define fruit for
-
+#define ITEM_ON_MAP WORLDMAP[PLAYER->current_loc->y][PLAYER->current_loc->x]->item  //item on map at player's current position
 //---------------------------------------------- prototypes ----------------------------------------------
 static inline int   getPlayerInputWolrdMap (void);
 static inline void  quitGame               (void);
@@ -19,9 +19,9 @@ static inline void  checkForItems          (void);
 
 
 static inline void checkForItems(void) {
-	if(WORLDMAP[PLAYER->current_loc->y][PLAYER->current_loc->x]->item != NULL) {
-		PLAYER->inventory[WORLDMAP[PLAYER->current_loc->y][PLAYER->current_loc->x]->item->type]->number_items++;
-		removeItemOffMap(WORLDMAP[PLAYER->current_loc->y][PLAYER->current_loc->x]->item);
+	if(ITEM_ON_MAP != NULLEMS) {
+		PLAYER->inventory[ITEM_ON_MAP->type]->number_items += (ITEM_ON_MAP->type == ARROW)? (rand() % 6) + 1 : 1;
+		removeItemOffMap(ITEM_ON_MAP);
 	}
 }
 
@@ -74,7 +74,7 @@ static inline void quitGame(void) {
 			PLAY = 0;
 			break;
 		default:
-			restoreMainWin();
+			restoreMainWinFromCombat();
 			break;
 	}
 }
@@ -96,13 +96,17 @@ static inline void resetMap(void) {
 int accessPlayerInventory(void) {
 	playerDisplayInventory();
 	int status = 0;
+	unsigned int choice = getch() - '0';
+	copyMainWinToCombat();
 	if(PLAYER->has_comp == 1) {
-		status = charUseItem(PLAYER,itemUseOn(),(unsigned int)getch());
+		status = useItem(choice,itemUseOn(),PLAYER);
 	}
 	else {
-		status = charUseItem(PLAYER,PLAYER,(unsigned int)getch());
+		status = useItem(choice,PLAYER,PLAYER);
 	}
-	restoreMainWin();
+	getch();
+	restoreMainWinFromCombat();
+	restoreMainWinFromInventory();
 	return status;
 }
 
@@ -166,6 +170,8 @@ int playerTurn(void) {
 		checkIfCombat();
 		checkForItems();
 		printCharacter(PLAYER);
+		checkEffects(PLAYER);
+		updateStatsWin();
 		return 1;
 	}
 	else {
