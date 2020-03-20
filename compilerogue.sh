@@ -7,7 +7,7 @@
 #prints the help message to terminal.
 printHelp() {
 	printf "compile script for rogue_clone\n"
-	printf "compiles rogie_clone and creates executable names 'rogue_clone'\n"
+	printf "compiles rogue_clone and creates executable names 'rogue_clone'\n"
 	printf "defaults to using gcc, but uses clang if user supplies '-c' to script.\n\n"
 	printf "options:\n"
 	printf " -c   --clang 	use clang instead of gcc\n"
